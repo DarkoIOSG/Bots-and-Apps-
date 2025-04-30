@@ -150,7 +150,7 @@ plt.savefig(save_path)
 
 if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["50_day_MA"]:
    if eth.iloc[len(eth)-1]["Close"] < eth.iloc[len(eth)-1]["50_day_MA"]:
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendMessage'
       chat_id = '-4240308218'
       text = 'Attention, ETH price go below 50D MA!'
@@ -158,7 +158,7 @@ if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["50_day_MA"]:
       telegram_msg = requests.get(msg)
 
       # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a timeseries chart ETH price and 50D MA 😉'
@@ -169,7 +169,7 @@ if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["50_day_MA"]:
                              files = ({'photo': open(local_img, 'rb')}))
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This are a average returns after ETH goes below 50D MA 😉'
@@ -181,7 +181,7 @@ if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["50_day_MA"]:
 
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a number of positive and negative returns after ETH goes below 50D MA 😉'
@@ -328,7 +328,7 @@ plt.savefig(file_path)
 
 if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["50_day_MA"]:
    if eth.iloc[len(eth)-1]["Close"] > eth.iloc[len(eth)-1]["50_day_MA"]:
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendMessage'
       chat_id = '-4240308218'
       text = 'Attention, ETH price go above 50D MA!'
@@ -336,7 +336,7 @@ if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["50_day_MA"]:
       telegram_msg = requests.get(msg)
 
       # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a timeseries chart ETH price and 50D MA 😉'
@@ -347,7 +347,7 @@ if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["50_day_MA"]:
                              files = ({'photo': open(local_img, 'rb')}))
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This are a average returns after ETH goes above 50D MA 😉'
@@ -359,7 +359,7 @@ if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["50_day_MA"]:
 
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a number of positive and negative returns after ETH goes above 50D MA 😉'
@@ -506,7 +506,7 @@ plt.savefig(file_path)
 
 if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["100_day_MA"]:
    if eth.iloc[len(eth)-1]["Close"] < eth.iloc[len(eth)-1]["100_day_MA"]:
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendMessage'
       chat_id = '-4240308218'
       text = 'Attention, ETH price go below 100D MA!'
@@ -514,7 +514,7 @@ if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["100_day_MA"]:
       telegram_msg = requests.get(msg)
 
       # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a timeseries chart ETH price and 100D MA 😉'
@@ -525,7 +525,7 @@ if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["100_day_MA"]:
                              files = ({'photo': open(local_img, 'rb')}))
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This are a average returns after ETH goes below 100D MA 😉'
@@ -537,7 +537,7 @@ if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["100_day_MA"]:
 
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a number of positive and negative returns after ETH goes below 100D MA 😉'
@@ -683,7 +683,7 @@ plt.savefig(file_path)
 
 if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["100_day_MA"]:
    if eth.iloc[len(eth)-1]["Close"] > eth.iloc[len(eth)-1]["100_day_MA"]:
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendMessage'
       chat_id = '-4240308218'
       text = 'Attention, ETH price go above 100D MA!'
@@ -691,7 +691,7 @@ if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["100_day_MA"]:
       telegram_msg = requests.get(msg)
 
       # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a timeseries chart ETH price and 100D MA 😉'
@@ -701,8 +701,8 @@ if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["100_day_MA"]:
                              data={'chat_id': chat_id, 'caption' : caption},
                              files = ({'photo': open(local_img, 'rb')}))
 
-        # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+            # Send photo by URL with caption - Option 1
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This are a average returns after ETH goes above 100D MA 😉'
@@ -714,7 +714,7 @@ if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["100_day_MA"]:
 
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a number of positive and negative returns after ETH goes above 100D MA 😉'
@@ -860,7 +860,7 @@ plt.savefig(file_path)
 
 if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["200_day_MA"]:
    if eth.iloc[len(eth)-1]["Close"] < eth.iloc[len(eth)-1]["200_day_MA"]:
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendMessage'
       chat_id = '-4240308218'
       text = 'Attention, ETH price go below 200D MA!'
@@ -868,7 +868,7 @@ if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["200_day_MA"]:
       telegram_msg = requests.get(msg)
 
       # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a timeseries chart ETH price and 200D MA 😉'
@@ -879,7 +879,7 @@ if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["200_day_MA"]:
                              files = ({'photo': open(local_img, 'rb')}))
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This are a average returns after ETH goes below 200D MA 😉'
@@ -891,7 +891,7 @@ if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["200_day_MA"]:
 
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a number of positive and negative returns after ETH goes below 200D MA 😉'
@@ -1037,7 +1037,7 @@ plt.savefig(file_path)
 
 if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["200_day_MA"]:
    if eth.iloc[len(eth)-1]["Close"] > eth.iloc[len(eth)-1]["200_day_MA"]:
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendMessage'
       chat_id = '-4240308218'
       text = 'Attention, ETH price go above 200D MA!'
@@ -1045,7 +1045,7 @@ if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["200_day_MA"]:
       telegram_msg = requests.get(msg)
 
       # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a timeseries chart ETH price and 200D MA 😉'
@@ -1056,7 +1056,7 @@ if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["200_day_MA"]:
                              files = ({'photo': open(local_img, 'rb')}))
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This are a average returns after ETH goes above 200D MA 😉'
@@ -1068,7 +1068,7 @@ if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["200_day_MA"]:
 
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a number of positive and negative returns after ETH goes above 200D MA 😉'
@@ -1214,7 +1214,7 @@ plt.savefig(file_path)
 
 if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["365_day_MA"]:
    if eth.iloc[len(eth)-1]["Close"] < eth.iloc[len(eth)-1]["365_day_MA"]:
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendMessage'
       chat_id = '-4240308218'
       text = 'Attention, ETH price go below 365D MA!'
@@ -1222,7 +1222,7 @@ if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["365_day_MA"]:
       telegram_msg = requests.get(msg)
 
       # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a timeseries chart ETH price and 365D MA 😉'
@@ -1233,7 +1233,7 @@ if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["365_day_MA"]:
                              files = ({'photo': open(local_img, 'rb')}))
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This are a average returns after ETH goes below 365D MA 😉'
@@ -1245,7 +1245,7 @@ if eth.iloc[len(eth)-2]["Close"] > eth.iloc[len(eth)-2]["365_day_MA"]:
 
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a number of positive and negative returns after ETH goes below 365D MA 😉'
@@ -1391,7 +1391,7 @@ plt.savefig(file_path)
 
 if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["365_day_MA"]:
    if eth.iloc[len(eth)-1]["Close"] > eth.iloc[len(eth)-1]["365_day_MA"]:
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendMessage'
       chat_id = '-4240308218'
       text = 'Attention, ETH price go above 365D MA!'
@@ -1399,7 +1399,7 @@ if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["365_day_MA"]:
       telegram_msg = requests.get(msg)
 
       # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This is a timeseries chart ETH price and 365D MA 😉'
@@ -1410,7 +1410,7 @@ if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["365_day_MA"]:
                              files = ({'photo': open(local_img, 'rb')}))
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
+      token = 'X'
       msg_type = 'sendPhoto'
       chat_id = '-4240308218'
       caption = 'This are a average returns after ETH goes above 365D MA 😉'
@@ -1422,8 +1422,7 @@ if eth.iloc[len(eth)-2]["Close"] < eth.iloc[len(eth)-2]["365_day_MA"]:
 
 
         # Send photo by URL with caption - Option 1
-      token = '7030846584:AAFOTCvzETfj8hVColivGqWM5O9lWfJQh-w'
-      msg_type = 'sendPhoto'
+      token = 'X'
       chat_id = '-4240308218'
       caption = 'This is a number of positive and negative returns after ETH goes above 365D MA 😉'
       local_img = rf"C:\Users\Acer\OneDrive\Desktop\BTC_ETH_crossings\eth_close_365dma_number_pos_neg_returns2.png" # your image path
