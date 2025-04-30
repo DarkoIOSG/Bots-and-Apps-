@@ -1091,18 +1091,18 @@ def run_all_checks():
         # 50/200 MA
         sending_to_tg_two_ma("BTC-USD", 50, 200, base_path)
         sending_to_tg_two_ma("BTC-USD", 200, 50, base_path)
-        # 7/50 MA
-        sending_to_tg_two_ma("BTC-USD", 7, 50, base_path)
-        sending_to_tg_two_ma("BTC-USD", 50, 7, base_path)
+        # 7/30 MA
+        sending_to_tg_two_ma("BTC-USD", 7, 30, base_path)
+        sending_to_tg_two_ma("BTC-USD", 30, 7, base_path)
         
         # ETH-USD ratio MA checks
         print("\nChecking ETH-USD ratio MAs...")
         # 50/200 MA
         sending_to_tg_two_ma("ETH-USD", 50, 200, base_path)
         sending_to_tg_two_ma("ETH-USD", 200, 50, base_path)
-        # 7/50 MA
-        sending_to_tg_two_ma("ETH-USD", 7, 50, base_path)
-        sending_to_tg_two_ma("ETH-USD", 50, 7, base_path)
+        # 7/30 MA
+        sending_to_tg_two_ma("ETH-USD", 7, 30, base_path)
+        sending_to_tg_two_ma("ETH-USD", 30, 7, base_path)
         
         print("\n✅ All checks completed successfully!")
         return True
