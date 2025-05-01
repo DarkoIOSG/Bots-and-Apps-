@@ -89,13 +89,13 @@ def plot_token_below_ma_yf_api(yf_ticker, num_ma_days):
 
     # Add legend, title, and labels
     ax.legend(fontsize=22)
-    ax.set_title(f"{yf_ticker} Price and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
+    ax.set_title(f"{yf_ticker[:-4]} Price and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
     ax.tick_params(axis='both', labelsize=22)
     ax.set_xlabel('Date', fontsize=30, fontweight='bold')
     ax.set_ylabel('Price', fontsize=30, fontweight='bold')
 
     # Save the plot
-    file_name = f"{yf_ticker}_close_{num_ma_days}dma_plot.png"
+    file_name = f"{yf_ticker[:-4]}_close_{num_ma_days}dma_plot.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -126,7 +126,7 @@ def plot_token_below_ma_yf_api(yf_ticker, num_ma_days):
     plt.xticks(rotation=45)
 
     # Save plot to Google Drive
-    file_name = f"{yf_ticker}_close_{num_ma_days}dma_average_returns.png"
+    file_name = f"{yf_ticker[:-4]}_close_{num_ma_days}dma_average_returns.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -152,7 +152,7 @@ def plot_token_below_ma_yf_api(yf_ticker, num_ma_days):
                     textcoords='offset points', rotation=90)
 
     ax3.legend(loc='upper left', fontsize=20)
-    ax3.set_title(f"Number of positive and negative returns after {yf_ticker} price cross below {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
+    ax3.set_title(f"Number of positive and negative returns after {yf_ticker[:-4]} price cross below {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
     ax3.tick_params(axis='both', which='major', labelsize=20, width=2, length=6)
     ax3.tick_params(axis='both', which='minor', labelsize=20, width=2, length=3)
     ax3.set_xlabel("period", fontsize=20, weight='bold')
@@ -161,7 +161,7 @@ def plot_token_below_ma_yf_api(yf_ticker, num_ma_days):
     # Rotate x-axis labels to normal
     plt.xticks(rotation=45)
 
-    file_name = f"{yf_ticker}_close_{num_ma_days}dma_number_pos_neg_returns.png"
+    file_name = f"{yf_ticker[:-4]}_close_{num_ma_days}dma_number_pos_neg_returns.png"
     save_path = os.path.join(base_path, file_name)
     plt.savefig(save_path)
     return token
@@ -223,13 +223,13 @@ def plot_token_above_ma_yf_api(yf_ticker, num_ma_days):
 
     # Add legend, title, and labels
     ax.legend(fontsize=22)
-    ax.set_title(f"{yf_ticker} Price and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
+    ax.set_title(f"{yf_ticker[:-4]} Price and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
     ax.tick_params(axis='both', labelsize=22)
     ax.set_xlabel('Date', fontsize=30, fontweight='bold')
     ax.set_ylabel('Price', fontsize=30, fontweight='bold')
 
     # Save the plot
-    file_name = f"{num_ma_days}dma_{yf_ticker}_close_plot.png"
+    file_name = f"{num_ma_days}dma_{yf_ticker[:-4]}_close_plot.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -260,7 +260,7 @@ def plot_token_above_ma_yf_api(yf_ticker, num_ma_days):
     plt.xticks(rotation=45)
 
     # Save plot to Google Drive
-    file_name = f"{num_ma_days}dma_{yf_ticker}_close_average_returns.png"
+    file_name = f"{num_ma_days}dma_{yf_ticker[:-4]}_close_average_returns.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -286,7 +286,7 @@ def plot_token_above_ma_yf_api(yf_ticker, num_ma_days):
                     textcoords='offset points', rotation=90)
 
     ax3.legend(loc='upper left', fontsize=20)
-    ax3.set_title(f"Number of positive and negative returns after {yf_ticker} price cross above {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
+    ax3.set_title(f"Number of positive and negative returns after {yf_ticker[:-4]} price cross above {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
     ax3.tick_params(axis='both', which='major', labelsize=20, width=2, length=6)
     ax3.tick_params(axis='both', which='minor', labelsize=20, width=2, length=3)
     ax3.set_xlabel("period", fontsize=20, weight='bold')
@@ -295,7 +295,7 @@ def plot_token_above_ma_yf_api(yf_ticker, num_ma_days):
     # Rotate x-axis labels to normal
     plt.xticks(rotation=45)
 
-    file_name = f"{num_ma_days}dma_{yf_ticker}_close_number_pos_neg_returns.png"
+    file_name = f"{num_ma_days}dma_{yf_ticker[:-4]}_close_number_pos_neg_returns.png"
     save_path = os.path.join(base_path, file_name)
     plt.savefig(save_path)
     return token
@@ -370,13 +370,13 @@ def plot_ratio_below_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
 
     # Add legend, title, and labels
     ax.legend(fontsize=22)
-    ax.set_title(f"{yf_ticker_a}/{yf_ticker_b} Ratio and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
+    ax.set_title(f"{yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} Ratio and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
     ax.tick_params(axis='both', labelsize=22)
     ax.set_xlabel('Date', fontsize=30, fontweight='bold')
     ax.set_ylabel('Ratio', fontsize=30, fontweight='bold')
 
     # Save the plot
-    file_name = f"{yf_ticker_a}_{yf_ticker_b}_ratio_{num_ma_days}dma_plot.png"
+    file_name = f"{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{num_ma_days}dma_plot.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -406,7 +406,7 @@ def plot_ratio_below_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
     plt.xticks(rotation=45)
 
     # Save plot
-    file_name = f"{num_ma_days}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_average_returns.png"
+    file_name = f"{num_ma_days}dma_{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{yf_ticker_a[:-4]}_close_average_returns.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -431,7 +431,7 @@ def plot_ratio_below_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
                     textcoords='offset points', rotation=90)
 
     ax3.legend(loc='upper left', fontsize=20)
-    ax3.set_title(f"Number of positive and negative returns of {yf_ticker_a} after {yf_ticker_a}/{yf_ticker_b} ratio cross below {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
+    ax3.set_title(f"Number of positive and negative returns of {yf_ticker_a[:-4]} after {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio cross below {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
     ax3.tick_params(axis='both', which='major', labelsize=20, width=2, length=6)
     ax3.tick_params(axis='both', which='minor', labelsize=20, width=2, length=3)
     ax3.set_xlabel("period", fontsize=20, weight='bold')
@@ -516,13 +516,13 @@ def plot_ratio_above_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
 
     # Add legend, title, and labels
     ax.legend(fontsize=22)
-    ax.set_title(f"{yf_ticker_a}/{yf_ticker_b} Ratio and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
+    ax.set_title(f"{yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} Ratio and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
     ax.tick_params(axis='both', labelsize=22)
     ax.set_xlabel('Date', fontsize=30, fontweight='bold')
     ax.set_ylabel('Ratio', fontsize=30, fontweight='bold')
 
     # Save the plot
-    file_name = f"{yf_ticker_a}_{yf_ticker_b}_ratio_{num_ma_days}dma_plot_2.png"
+    file_name = f"{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{num_ma_days}dma_plot_2.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -552,7 +552,7 @@ def plot_ratio_above_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
     plt.xticks(rotation=45)
 
     # Save plot
-    file_name = f"{num_ma_days}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_average_returns_2.png"
+    file_name = f"{num_ma_days}dma_{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{yf_ticker_a[:-4]}_close_average_returns_2.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -577,7 +577,7 @@ def plot_ratio_above_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
                     textcoords='offset points', rotation=90)
 
     ax3.legend(loc='upper left', fontsize=20)
-    ax3.set_title(f"Number of positive and negative returns of {yf_ticker_a} after {yf_ticker_a}/{yf_ticker_b} ratio cross above {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
+    ax3.set_title(f"Number of positive and negative returns of {yf_ticker_a[:-4]} after {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio cross above {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
     ax3.tick_params(axis='both', which='major', labelsize=20, width=2, length=6)
     ax3.tick_params(axis='both', which='minor', labelsize=20, width=2, length=3)
     ax3.set_xlabel("period", fontsize=20, weight='bold')
@@ -585,7 +585,7 @@ def plot_ratio_above_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
     plt.xticks(np.arange(9), ['30 days', '45 days', '60 days', '75 days', '90 days', '120 days', '150 days', '180 days','365 days'])
     plt.xticks(rotation=45)
 
-    file_name = f"{num_ma_days}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_number_pos_neg_returns_2.png"
+    file_name = f"{num_ma_days}dma_{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{yf_ticker_a[:-4]}_close_number_pos_neg_returns_2.png"
     save_path = os.path.join(base_path, file_name)
     plt.savefig(save_path)
     plt.close()
@@ -651,7 +651,7 @@ def plot_token_two_ma_yf_api(yf_ticker, num_ma_days_a, num_ma_days_b):
 
     # Add legend, title, and labels
     ax.legend(fontsize=22)
-    ax.set_title(f"{yf_ticker} {num_ma_days_a} and {num_ma_days_b}-day Moving Average", fontsize=28, fontweight='bold')
+    ax.set_title(f"{yf_ticker[:-4]} {num_ma_days_a} and {num_ma_days_b}-day Moving Average", fontsize=28, fontweight='bold')
     ax.tick_params(axis='both', labelsize=22)
     ax.set_xlabel('Date', fontsize=30, fontweight='bold')
     ax.set_ylabel('Price', fontsize=30, fontweight='bold')
@@ -688,7 +688,7 @@ def plot_token_two_ma_yf_api(yf_ticker, num_ma_days_a, num_ma_days_b):
     plt.xticks(rotation=45)
 
     # Save plot to Google Drive
-    file_name = f"{yf_ticker}_{num_ma_days_a}_{num_ma_days_b}dma_average_returns.png"
+    file_name = f"{yf_ticker[:-4]}_{num_ma_days_a}_{num_ma_days_b}dma_average_returns.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -714,7 +714,7 @@ def plot_token_two_ma_yf_api(yf_ticker, num_ma_days_a, num_ma_days_b):
                     textcoords='offset points', rotation=90)
 
     ax3.legend(loc='upper left', fontsize=20)
-    ax3.set_title(f"Number of positive and negative returns after {yf_ticker} {num_ma_days_a} cross below {num_ma_days_b} days moving averages line", fontsize=20, fontweight='bold')
+    ax3.set_title(f"Number of positive and negative returns after {yf_ticker[:-4]} {num_ma_days_a} cross below {num_ma_days_b} days moving averages line", fontsize=20, fontweight='bold')
     ax3.tick_params(axis='both', which='major', labelsize=20, width=2, length=6)
     ax3.tick_params(axis='both', which='minor', labelsize=20, width=2, length=3)
     ax3.set_xlabel("period", fontsize=20, weight='bold')
@@ -723,7 +723,7 @@ def plot_token_two_ma_yf_api(yf_ticker, num_ma_days_a, num_ma_days_b):
     # Rotate x-axis labels to normal
     plt.xticks(rotation=45)
 
-    file_name = f"{yf_ticker}_{num_ma_days_a}_{num_ma_days_b}dma_number_pos_neg_returns.png"
+    file_name = f"{yf_ticker[:-4]}_{num_ma_days_a}_{num_ma_days_b}dma_number_pos_neg_returns.png"
     save_path = os.path.join(base_path, file_name)
     plt.savefig(save_path)
     return token
@@ -798,13 +798,13 @@ def plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_day
 
     # Add legend, title, and labels
     ax.legend(fontsize=22)
-    ax.set_title(f"{yf_ticker_a} {num_ma_days_a} and {num_ma_days_b}-day Moving Average", fontsize=28, fontweight='bold')
+    ax.set_title(f"{yf_ticker_a[:-4]} {num_ma_days_a} and {num_ma_days_b}-day Moving Average", fontsize=28, fontweight='bold')
     ax.tick_params(axis='both', labelsize=22)
     ax.set_xlabel('Date', fontsize=30, fontweight='bold')
     ax.set_ylabel('Price', fontsize=30, fontweight='bold')
 
     # Save the plot
-    file_name = f"{yf_ticker_a}_{num_ma_days_a}_{num_ma_days_b}dma_plot.png"
+    file_name = f"{yf_ticker_a[:-4]}_{num_ma_days_a}_{num_ma_days_b}dma_plot.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -833,7 +833,7 @@ def plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_day
     plt.xticks(rotation=45)
 
     # Save plot
-    file_name = f"{yf_ticker_a}_{num_ma_days_a}_{num_ma_days_b}dma_average_returns.png"
+    file_name = f"{yf_ticker_a[:-4]}_{num_ma_days_a}_{num_ma_days_b}dma_average_returns.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -904,14 +904,14 @@ def sending_to_tg_price_below_ma(yf_ticker, num_ma_days, base_path):
        token_df.iloc[-1]["Close"] < token_df.iloc[-1][f"{num_ma_days}_day_MA"]:
         
         # Send text alert
-        text = f'Attention, {yf_ticker} price went below {num_ma_days}D MA!'
+        text = f'Attention, {yf_ticker[:-4]} price went below {num_ma_days}D MA!'
         send_telegram_message(token, chat_id, text)
 
         # Define images and captions
         image_info = [
-            (f"{yf_ticker}_close_{num_ma_days}dma_plot.png", f'This is a timeseries chart of {yf_ticker} price and {num_ma_days}D MA 😉'),
-            (f"{yf_ticker}_close_{num_ma_days}dma_average_returns.png", f'These are the average returns after {yf_ticker} goes below {num_ma_days}D MA 😉'),
-            (f"{yf_ticker}_close_{num_ma_days}dma_number_pos_neg_returns.png", f'This is the number of positive and negative returns after {yf_ticker} goes below {num_ma_days}D MA 😉')
+            (f"{yf_ticker[:-4]}_close_{num_ma_days}dma_plot.png", f'This is a timeseries chart of {yf_ticker[:-4]} price and {num_ma_days}D MA 😉'),
+            (f"{yf_ticker[:-4]}_close_{num_ma_days}dma_average_returns.png", f'These are the average returns after {yf_ticker[:-4]} goes below {num_ma_days}D MA 😉'),
+            (f"{yf_ticker[:-4]}_close_{num_ma_days}dma_number_pos_neg_returns.png", f'This is the number of positive and negative returns after {yf_ticker[:-4]} goes below {num_ma_days}D MA 😉')
         ]
 
         # Send each image
@@ -929,14 +929,14 @@ def sending_to_tg_price_above_ma(yf_ticker, num_ma_days, base_path):
        token_df.iloc[-1]["Close"] > token_df.iloc[-1][f"{num_ma_days}_day_MA"]:
         
         # Send text alert
-        text = f'Attention, {yf_ticker} price went above {num_ma_days}D MA!'
+        text = f'Attention, {yf_ticker[:-4]} price went above {num_ma_days}D MA!'
         send_telegram_message(token, chat_id, text)
 
         # Define images and captions
         image_info = [
-            (f"{num_ma_days}dma_{yf_ticker}_close_plot.png", f'This is a timeseries chart of {yf_ticker} price and {num_ma_days}D MA 😉'),
-            (f"{num_ma_days}dma_{yf_ticker}_close_average_returns.png", f'These are the average returns after {yf_ticker} goes above {num_ma_days}D MA 😉'),
-            (f"{num_ma_days}dma_{yf_ticker}_close_number_pos_neg_returns.png", f'This is the number of positive and negative returns after {yf_ticker} goes above {num_ma_days}D MA 😉')
+            (f"{num_ma_days}dma_{yf_ticker[:-4]}_close_plot.png", f'This is a timeseries chart of {yf_ticker[:-4]} price and {num_ma_days}D MA 😉'),
+            (f"{num_ma_days}dma_{yf_ticker[:-4]}_close_average_returns.png", f'These are the average returns after {yf_ticker[:-4]} goes above {num_ma_days}D MA 😉'),
+            (f"{num_ma_days}dma_{yf_ticker[:-4]}_close_number_pos_neg_returns.png", f'This is the number of positive and negative returns after {yf_ticker[:-4]} goes above {num_ma_days}D MA 😉')
         ]
 
         # Send each image
@@ -954,14 +954,14 @@ def sending_to_tg_ratio_below_ma(yf_ticker_a, yf_ticker_b, num_ma_days, base_pat
        token_df.iloc[-1]["Ratio"] < token_df.iloc[-1][f"{num_ma_days}_day_MA"]:
         
         # Send text alert
-        text = f'Attention, {yf_ticker_a}/{yf_ticker_b} ratio went below {num_ma_days}D MA!'
+        text = f'Attention, {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio went below {num_ma_days}D MA!'
         send_telegram_message(token, chat_id, text)
 
         # Define images and captions
         image_info = [
-            (f"{yf_ticker_a}_{yf_ticker_b}_ratio_{num_ma_days}dma_plot.png", f'This is a timeseries chart of {yf_ticker_a}/{yf_ticker_b} ratio and {num_ma_days}D MA 😉'),
-            (f"{num_ma_days}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_average_returns.png", f'These are the average returns of {yf_ticker_a} after {yf_ticker_a}/{yf_ticker_b} ratio goes below {num_ma_days}D MA 😉'),
-            (f"{num_ma_days}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_number_pos_neg_returns.png", f'This is the number of positive and negative returns of {yf_ticker_a} after {yf_ticker_a}/{yf_ticker_b} ratio goes below {num_ma_days}D MA 😉')
+            (f"{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{num_ma_days}dma_plot.png", f'This is a timeseries chart of {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio and {num_ma_days}D MA 😉'),
+            (f"{num_ma_days}dma_{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{yf_ticker_a[:-4]}_close_average_returns.png", f'These are the average returns of {yf_ticker_a[:-4]} after {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio goes below {num_ma_days}D MA 😉'),
+            (f"{num_ma_days}dma_{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{yf_ticker_a[:-4]}_close_number_pos_neg_returns.png", f'This is the number of positive and negative returns of {yf_ticker_a[:-4]} after {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio goes below {num_ma_days}D MA 😉')
         ]
 
         # Send each image
@@ -979,14 +979,14 @@ def sending_to_tg_ratio_above_ma(yf_ticker_a, yf_ticker_b, num_ma_days, base_pat
        token_df.iloc[-1]["Ratio"] > token_df.iloc[-1][f"{num_ma_days}_day_MA"]:
         
         # Send text alert
-        text = f'Attention, {yf_ticker_a}/{yf_ticker_b} ratio went above {num_ma_days}D MA!'
+        text = f'Attention, {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio went above {num_ma_days}D MA!'
         send_telegram_message(token, chat_id, text)
 
         # Define images and captions
         image_info = [
-            (f"{yf_ticker_a}_{yf_ticker_b}_ratio_{num_ma_days}dma_plot_2.png", f'This is a timeseries chart of {yf_ticker_a}/{yf_ticker_b} ratio and {num_ma_days}D MA 😉'),
-            (f"{num_ma_days}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_average_returns_2.png", f'These are the average returns of {yf_ticker_a} after {yf_ticker_a}/{yf_ticker_b} ratio goes above {num_ma_days}D MA 😉'),
-            (f"{num_ma_days}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_number_pos_neg_returns_2.png", f'This is the number of positive and negative returns of {yf_ticker_a} after {yf_ticker_a}/{yf_ticker_b} ratio goes above {num_ma_days}D MA 😉')
+            (f"{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{num_ma_days}dma_plot_2.png", f'This is a timeseries chart of {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio and {num_ma_days}D MA 😉'),
+            (f"{num_ma_days}dma_{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{yf_ticker_a[:-4]}_close_average_returns_2.png", f'These are the average returns of {yf_ticker_a[:-4]} after {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio goes above {num_ma_days}D MA 😉'),
+            (f"{num_ma_days}dma_{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{yf_ticker_a[:-4]}_close_number_pos_neg_returns_2.png", f'This is the number of positive and negative returns of {yf_ticker_a[:-4]} after {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio goes above {num_ma_days}D MA 😉')
         ]
 
         # Send each image
@@ -1005,14 +1005,14 @@ def sending_to_tg_two_ma(yf_ticker, num_ma_days_a, num_ma_days_b, base_path):
        token_df.iloc[-1][f"{num_ma_days_a}_day_MA"] < token_df.iloc[-1][f"{num_ma_days_b}_day_MA"]:
         
         # Send text alert
-        text = f'Attention, {yf_ticker} {num_ma_days_a} went below {num_ma_days_b}D MA!'
+        text = f'Attention, {yf_ticker[:-4]} {num_ma_days_a} went below {num_ma_days_b}D MA!'
         send_telegram_message(token, chat_id, text)
 
         # Define images and captions
         image_info = [
-            (f"{yf_ticker}_{num_ma_days_a}_{num_ma_days_b}dma_plot.png", f'This is a timeseries chart of {yf_ticker} {num_ma_days_a} and {num_ma_days_b}D MA 😉'),
-            (f"{yf_ticker}_{num_ma_days_a}_{num_ma_days_b}dma_average_returns.png", f'These are the average returns after {yf_ticker} {num_ma_days_a} goes below {num_ma_days_b}D MA 😉'),
-            (f"{yf_ticker}_{num_ma_days_a}_{num_ma_days_b}dma_number_pos_neg_returns.png", f'This is the number of positive and negative returns after {yf_ticker} {num_ma_days_a} goes below {num_ma_days_b}D MA 😉')
+            (f"{yf_ticker[:-4]}_{num_ma_days_a}_{num_ma_days_b}dma_plot.png", f'This is a timeseries chart of {yf_ticker[:-4]} {num_ma_days_a} and {num_ma_days_b}D MA 😉'),
+            (f"{yf_ticker[:-4]}_{num_ma_days_a}_{num_ma_days_b}dma_average_returns.png", f'These are the average returns after {yf_ticker[:-4]} {num_ma_days_a} goes below {num_ma_days_b}D MA 😉'),
+            (f"{yf_ticker[:-4]}_{num_ma_days_a}_{num_ma_days_b}dma_number_pos_neg_returns.png", f'This is the number of positive and negative returns after {yf_ticker[:-4]} {num_ma_days_a} goes below {num_ma_days_b}D MA 😉')
         ]
 
         # Send each image
@@ -1118,3 +1118,5 @@ if __name__ == "__main__":
     
     # Run all checks
     run_all_checks()
+    print("Clearing output folder...")
+    clear_output_folder(base_path)
