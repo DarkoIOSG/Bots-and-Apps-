@@ -5,6 +5,36 @@ import pandas as pd
 import yfinance as yf
 import os
 import glob
+import datetime as dt
+import json
+
+cg_token = os.getenv("CoinGecko_token")
+
+def get_cg_mcap(coin_name, days='max'):
+    headers = {
+        "accept": "application/json",
+        "x-cg-pro-api-key": cg_token
+    }
+    url = f"https://pro-api.coingecko.com/api/v3/coins/{coin_name}/market_chart?vs_currency=usd&days={days}"
+    response = requests.get(url, headers=headers)
+    data_shows = json.loads(response.text)
+    data = data_shows['market_caps']
+
+    date = []
+    mcap = []
+    for i in range(len(data)):
+        date.append(dt.datetime.fromtimestamp(data[i][0] / 1000))
+        mcap.append(data[i][1])
+
+    df = pd.DataFrame(data=mcap, index=date, columns=[coin_name])
+
+    # Convert index to date only (drop time)
+    df.index = pd.to_datetime(df.index).date
+
+    # Keep only the last entry per day
+    df = df.groupby(df.index).last()
+
+    return df
 
 # Get the directory where the script is located
 project_folder = os.path.dirname(os.path.abspath(__file__))
@@ -35,33 +65,33 @@ def calculate_counts(df):
 def plot_token_below_ma_yf_api(yf_ticker, num_ma_days):
 
     # Fetch data
-    token = yf.Ticker(yf_ticker).history(period="max")
-    token[f"{num_ma_days}_day_MA"] = token["Close"].rolling(window=num_ma_days).mean()
+    token = get_cg_mcap(yf_ticker, days='max')
+    token[f"{num_ma_days}_day_MA"] = token[yf_ticker].rolling(window=num_ma_days).mean()
 
     dates = []
     for i in range(len(token) - 15):
-        if token.iloc[i]["Close"] > token.iloc[i][f"{num_ma_days}_day_MA"]:
-            if token.iloc[i+1]["Close"] < token.iloc[i+1][f"{num_ma_days}_day_MA"]:
-                if (token.iloc[i+1:i+16]["Close"] < token.iloc[i+1:i+16][f"{num_ma_days}_day_MA"]).all():
+        if token.iloc[i][yf_ticker] > token.iloc[i][f"{num_ma_days}_day_MA"]:
+            if token.iloc[i+1][yf_ticker] < token.iloc[i+1][f"{num_ma_days}_day_MA"]:
+                if (token.iloc[i+1:i+16][yf_ticker] < token.iloc[i+1:i+16][f"{num_ma_days}_day_MA"]).all():
                     dates.append(token.index[i+1])
 
     returns = []
     for date in dates:
         idx = token.index.get_loc(date)
-        close_price = token.iloc[idx]["Close"]
+        close_MCAP = token.iloc[idx][yf_ticker]
 
         if idx + 365 < len(token):
             returns.append({
                 "date": date,
-                "30_day_return": (token.iloc[idx+30]["Close"] - close_price) / close_price,
-                "45_day_return": (token.iloc[idx+45]["Close"] - close_price) / close_price,
-                "60_day_return": (token.iloc[idx+60]["Close"] - close_price) / close_price,
-                "75_day_return": (token.iloc[idx+75]["Close"] - close_price) / close_price,
-                "90_day_return": (token.iloc[idx+90]["Close"] - close_price) / close_price,
-                "120_day_return": (token.iloc[idx+120]["Close"] - close_price) / close_price,
-                "150_day_return": (token.iloc[idx+150]["Close"] - close_price) / close_price,
-                "180_day_return": (token.iloc[idx+180]["Close"] - close_price) / close_price,
-                "365_day_return": (token.iloc[idx+365]["Close"] - close_price) / close_price
+                "30_day_return": (token.iloc[idx+30][yf_ticker] - close_MCAP) / close_MCAP,
+                "45_day_return": (token.iloc[idx+45][yf_ticker] - close_MCAP) / close_MCAP,
+                "60_day_return": (token.iloc[idx+60][yf_ticker] - close_MCAP) / close_MCAP,
+                "75_day_return": (token.iloc[idx+75][yf_ticker] - close_MCAP) / close_MCAP,
+                "90_day_return": (token.iloc[idx+90][yf_ticker] - close_MCAP) / close_MCAP,
+                "120_day_return": (token.iloc[idx+120][yf_ticker] - close_MCAP) / close_MCAP,
+                "150_day_return": (token.iloc[idx+150][yf_ticker] - close_MCAP) / close_MCAP,
+                "180_day_return": (token.iloc[idx+180][yf_ticker] - close_MCAP) / close_MCAP,
+                "365_day_return": (token.iloc[idx+365][yf_ticker] - close_MCAP) / close_MCAP
             })
 
     returns = pd.DataFrame(returns)
@@ -82,20 +112,20 @@ def plot_token_below_ma_yf_api(yf_ticker, num_ma_days):
 
     # Plot data
     fig, ax = plt.subplots(figsize=(30, 12))
-    ax.plot(token["Close"], label="Close", linewidth=3.5)
+    ax.plot(token[yf_ticker], label=yf_ticker, linewidth=3.5)
     ax.plot(token[f"{num_ma_days}_day_MA"], label=f"{num_ma_days}-day MA", linewidth=3.5)
     for date in dates:
         ax.axvline(x=date, color='black', linestyle='--', alpha=0.9)
 
     # Add legend, title, and labels
     ax.legend(fontsize=22)
-    ax.set_title(f"{yf_ticker[:-4]} Price and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
+    ax.set_title(f"{yf_ticker} MCAP and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
     ax.tick_params(axis='both', labelsize=22)
     ax.set_xlabel('Date', fontsize=30, fontweight='bold')
-    ax.set_ylabel('Price', fontsize=30, fontweight='bold')
+    ax.set_ylabel('MCAP', fontsize=30, fontweight='bold')
 
     # Save the plot
-    file_name = f"{yf_ticker[:-4]}_close_{num_ma_days}dma_plot.png"
+    file_name = f"{yf_ticker}_close_{num_ma_days}dma_plot.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -126,7 +156,7 @@ def plot_token_below_ma_yf_api(yf_ticker, num_ma_days):
     plt.xticks(rotation=45)
 
     # Save plot to Google Drive
-    file_name = f"{yf_ticker[:-4]}_close_{num_ma_days}dma_average_returns.png"
+    file_name = f"{yf_ticker}_close_{num_ma_days}dma_average_returns.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -152,7 +182,7 @@ def plot_token_below_ma_yf_api(yf_ticker, num_ma_days):
                     textcoords='offset points', rotation=90)
 
     ax3.legend(loc='upper left', fontsize=20)
-    ax3.set_title(f"Number of positive and negative returns after {yf_ticker[:-4]} price cross below {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
+    ax3.set_title(f"Number of positive and negative returns after {yf_ticker} MCAP cross below {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
     ax3.tick_params(axis='both', which='major', labelsize=20, width=2, length=6)
     ax3.tick_params(axis='both', which='minor', labelsize=20, width=2, length=3)
     ax3.set_xlabel("period", fontsize=20, weight='bold')
@@ -161,7 +191,7 @@ def plot_token_below_ma_yf_api(yf_ticker, num_ma_days):
     # Rotate x-axis labels to normal
     plt.xticks(rotation=45)
 
-    file_name = f"{yf_ticker[:-4]}_close_{num_ma_days}dma_number_pos_neg_returns.png"
+    file_name = f"{yf_ticker}_close_{num_ma_days}dma_number_pos_neg_returns.png"
     save_path = os.path.join(base_path, file_name)
     plt.savefig(save_path)
     return token
@@ -169,33 +199,33 @@ def plot_token_below_ma_yf_api(yf_ticker, num_ma_days):
 def plot_token_above_ma_yf_api(yf_ticker, num_ma_days):
 
     # Fetch data
-    token = yf.Ticker(yf_ticker).history(period="max")
-    token[f"{num_ma_days}_day_MA"] = token["Close"].rolling(window=num_ma_days).mean()
+    token = get_cg_mcap(yf_ticker, days='max')
+    token[f"{num_ma_days}_day_MA"] = token[yf_ticker].rolling(window=num_ma_days).mean()
 
     dates = []
     for i in range(len(token) - 15):
-        if token.iloc[i]["Close"] < token.iloc[i][f"{num_ma_days}_day_MA"]:
-            if token.iloc[i+1]["Close"] > token.iloc[i+1][f"{num_ma_days}_day_MA"]:
-                if (token.iloc[i+1:i+16]["Close"] > token.iloc[i+1:i+16][f"{num_ma_days}_day_MA"]).all():
+        if token.iloc[i][yf_ticker] < token.iloc[i][f"{num_ma_days}_day_MA"]:
+            if token.iloc[i+1][yf_ticker] > token.iloc[i+1][f"{num_ma_days}_day_MA"]:
+                if (token.iloc[i+1:i+16][yf_ticker] > token.iloc[i+1:i+16][f"{num_ma_days}_day_MA"]).all():
                     dates.append(token.index[i+1])
 
     returns = []
     for date in dates:
         idx = token.index.get_loc(date)
-        close_price = token.iloc[idx]["Close"]
+        close_MCAP = token.iloc[idx][yf_ticker]
 
         if idx + 365 < len(token):
             returns.append({
                 "date": date,
-                "30_day_return": (token.iloc[idx+30]["Close"] - close_price) / close_price,
-                "45_day_return": (token.iloc[idx+45]["Close"] - close_price) / close_price,
-                "60_day_return": (token.iloc[idx+60]["Close"] - close_price) / close_price,
-                "75_day_return": (token.iloc[idx+75]["Close"] - close_price) / close_price,
-                "90_day_return": (token.iloc[idx+90]["Close"] - close_price) / close_price,
-                "120_day_return": (token.iloc[idx+120]["Close"] - close_price) / close_price,
-                "150_day_return": (token.iloc[idx+150]["Close"] - close_price) / close_price,
-                "180_day_return": (token.iloc[idx+180]["Close"] - close_price) / close_price,
-                "365_day_return": (token.iloc[idx+365]["Close"] - close_price) / close_price
+                "30_day_return": (token.iloc[idx+30][yf_ticker] - close_MCAP) / close_MCAP,
+                "45_day_return": (token.iloc[idx+45][yf_ticker] - close_MCAP) / close_MCAP,
+                "60_day_return": (token.iloc[idx+60][yf_ticker] - close_MCAP) / close_MCAP,
+                "75_day_return": (token.iloc[idx+75][yf_ticker] - close_MCAP) / close_MCAP,
+                "90_day_return": (token.iloc[idx+90][yf_ticker] - close_MCAP) / close_MCAP,
+                "120_day_return": (token.iloc[idx+120][yf_ticker] - close_MCAP) / close_MCAP,
+                "150_day_return": (token.iloc[idx+150][yf_ticker] - close_MCAP) / close_MCAP,
+                "180_day_return": (token.iloc[idx+180][yf_ticker] - close_MCAP) / close_MCAP,
+                "365_day_return": (token.iloc[idx+365][yf_ticker] - close_MCAP) / close_MCAP
             })
 
     returns = pd.DataFrame(returns)
@@ -216,20 +246,20 @@ def plot_token_above_ma_yf_api(yf_ticker, num_ma_days):
 
     # Plot data
     fig, ax = plt.subplots(figsize=(30, 12))
-    ax.plot(token["Close"], label="Close", linewidth=3.5)
+    ax.plot(token[yf_ticker], label=yf_ticker, linewidth=3.5)
     ax.plot(token[f"{num_ma_days}_day_MA"], label=f"{num_ma_days}-day MA", linewidth=3.5)
     for date in dates:
         ax.axvline(x=date, color='black', linestyle='--', alpha=0.9)
 
     # Add legend, title, and labels
     ax.legend(fontsize=22)
-    ax.set_title(f"{yf_ticker[:-4]} Price and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
+    ax.set_title(f"{yf_ticker} MCAP and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
     ax.tick_params(axis='both', labelsize=22)
     ax.set_xlabel('Date', fontsize=30, fontweight='bold')
-    ax.set_ylabel('Price', fontsize=30, fontweight='bold')
+    ax.set_ylabel('MCAP', fontsize=30, fontweight='bold')
 
     # Save the plot
-    file_name = f"{num_ma_days}dma_{yf_ticker[:-4]}_close_plot.png"
+    file_name = f"{num_ma_days}dma_{yf_ticker}_close_plot.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -260,7 +290,7 @@ def plot_token_above_ma_yf_api(yf_ticker, num_ma_days):
     plt.xticks(rotation=45)
 
     # Save plot to Google Drive
-    file_name = f"{num_ma_days}dma_{yf_ticker[:-4]}_close_average_returns.png"
+    file_name = f"{num_ma_days}dma_{yf_ticker}_close_average_returns.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -286,7 +316,7 @@ def plot_token_above_ma_yf_api(yf_ticker, num_ma_days):
                     textcoords='offset points', rotation=90)
 
     ax3.legend(loc='upper left', fontsize=20)
-    ax3.set_title(f"Number of positive and negative returns after {yf_ticker[:-4]} price cross above {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
+    ax3.set_title(f"Number of positive and negative returns after {yf_ticker} MCAP cross above {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
     ax3.tick_params(axis='both', which='major', labelsize=20, width=2, length=6)
     ax3.tick_params(axis='both', which='minor', labelsize=20, width=2, length=3)
     ax3.set_xlabel("period", fontsize=20, weight='bold')
@@ -295,30 +325,28 @@ def plot_token_above_ma_yf_api(yf_ticker, num_ma_days):
     # Rotate x-axis labels to normal
     plt.xticks(rotation=45)
 
-    file_name = f"{num_ma_days}dma_{yf_ticker[:-4]}_close_number_pos_neg_returns.png"
+    file_name = f"{num_ma_days}dma_{yf_ticker}_close_number_pos_neg_returns.png"
     save_path = os.path.join(base_path, file_name)
     plt.savefig(save_path)
     return token
 
 def plot_ratio_below_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
     # Fetch data for both tickers
-    token_a = yf.Ticker(yf_ticker_a).history(period="max")
-    token_b = yf.Ticker(yf_ticker_b).history(period="max")
+    token_a = get_cg_mcap(yf_ticker_a, days='max')
+    token_b = get_cg_mcap(yf_ticker_b, days='max')
     
     # Ensure both tokens have overlapping dates
-    token_b = token_b.tz_convert('UTC')
+    #token_b = token_b.tz_convert('UTC')
     
     # Convert index to date
-    token_a.index = token_a.index.date
-    token_b.index = token_b.index.date
+    #token_a.index = token_a.index.date
+    #token_b.index = token_b.index.date
     
     # Merge the dataframes on 'Date' column
     df = pd.merge(token_a, token_b, left_index=True, right_index=True, how='inner')
-    
     # Calculate the ratio
-    df['Ratio'] = df['Close_x'] / df['Close_y']
+    df['Ratio'] = df[yf_ticker_a] / df[yf_ticker_b]
     df[f"{num_ma_days}_day_MA"] = df["Ratio"].rolling(window=num_ma_days).mean()
-    
     dates = []
     for i in range(len(df) - 15):
         if df.iloc[i]["Ratio"] > df.iloc[i][f"{num_ma_days}_day_MA"]:
@@ -329,20 +357,20 @@ def plot_ratio_below_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
     returns = []
     for date in dates:
         idx = df.index.get_loc(date)
-        close_price = df.iloc[idx]["Close_x"]
+        close_MCAP = df.iloc[idx][yf_ticker_a]
 
         if idx + 365 < len(df):
             returns.append({
                 "date": date,
-                "30_day_return": (df.iloc[idx+30]["Close_x"] - close_price) / close_price,
-                "45_day_return": (df.iloc[idx+45]["Close_x"] - close_price) / close_price,
-                "60_day_return": (df.iloc[idx+60]["Close_x"] - close_price) / close_price,
-                "75_day_return": (df.iloc[idx+75]["Close_x"] - close_price) / close_price,
-                "90_day_return": (df.iloc[idx+90]["Close_x"] - close_price) / close_price,
-                "120_day_return": (df.iloc[idx+120]["Close_x"] - close_price) / close_price,
-                "150_day_return": (df.iloc[idx+150]["Close_x"] - close_price) / close_price,
-                "180_day_return": (df.iloc[idx+180]["Close_x"] - close_price) / close_price,
-                "365_day_return": (df.iloc[idx+365]["Close_x"] - close_price) / close_price
+                "30_day_return": (df.iloc[idx+30][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "45_day_return": (df.iloc[idx+45][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "60_day_return": (df.iloc[idx+60][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "75_day_return": (df.iloc[idx+75][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "90_day_return": (df.iloc[idx+90][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "120_day_return": (df.iloc[idx+120][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "150_day_return": (df.iloc[idx+150][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "180_day_return": (df.iloc[idx+180][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "365_day_return": (df.iloc[idx+365][yf_ticker_a] - close_MCAP) / close_MCAP
             })
 
     returns = pd.DataFrame(returns)
@@ -370,13 +398,13 @@ def plot_ratio_below_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
 
     # Add legend, title, and labels
     ax.legend(fontsize=22)
-    ax.set_title(f"{yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} Ratio and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
+    ax.set_title(f"{yf_ticker_a}/{yf_ticker_b} Ratio and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
     ax.tick_params(axis='both', labelsize=22)
     ax.set_xlabel('Date', fontsize=30, fontweight='bold')
     ax.set_ylabel('Ratio', fontsize=30, fontweight='bold')
 
     # Save the plot
-    file_name = f"{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{num_ma_days}dma_plot.png"
+    file_name = f"{yf_ticker_a}_{yf_ticker_b}_ratio_{num_ma_days}dma_plot.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -406,7 +434,7 @@ def plot_ratio_below_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
     plt.xticks(rotation=45)
 
     # Save plot
-    file_name = f"{num_ma_days}dma_{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{yf_ticker_a[:-4]}_close_average_returns.png"
+    file_name = f"{num_ma_days}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_average_returns.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -431,7 +459,7 @@ def plot_ratio_below_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
                     textcoords='offset points', rotation=90)
 
     ax3.legend(loc='upper left', fontsize=20)
-    ax3.set_title(f"Number of positive and negative returns of {yf_ticker_a[:-4]} after {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio cross below {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
+    ax3.set_title(f"Number of positive and negative returns of {yf_ticker_a} after {yf_ticker_a}/{yf_ticker_b} ratio cross below {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
     ax3.tick_params(axis='both', which='major', labelsize=20, width=2, length=6)
     ax3.tick_params(axis='both', which='minor', labelsize=20, width=2, length=3)
     ax3.set_xlabel("period", fontsize=20, weight='bold')
@@ -448,21 +476,21 @@ def plot_ratio_below_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
 
 def plot_ratio_above_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
     # Fetch data for both tickers
-    token_a = yf.Ticker(yf_ticker_a).history(period="max")
-    token_b = yf.Ticker(yf_ticker_b).history(period="max")
+    token_a = get_cg_mcap(yf_ticker_a, days='max')
+    token_b = get_cg_mcap(yf_ticker_b, days='max')
     
     # Ensure both tokens have overlapping dates
-    token_b = token_b.tz_convert('UTC')
+    #token_b = token_b.tz_convert('UTC')
     
     # Convert index to date
-    token_a.index = token_a.index.date
-    token_b.index = token_b.index.date
+    #token_a.index = token_a.index.date
+    #token_b.index = token_b.index.date
     
     # Merge the dataframes on 'Date' column
     df = pd.merge(token_a, token_b, left_index=True, right_index=True, how='inner')
     
     # Calculate the ratio
-    df['Ratio'] = df['Close_x'] / df['Close_y']
+    df['Ratio'] = df[yf_ticker_a] / df[yf_ticker_b]
     df[f"{num_ma_days}_day_MA"] = df["Ratio"].rolling(window=num_ma_days).mean()
     
     dates = []
@@ -475,20 +503,20 @@ def plot_ratio_above_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
     returns = []
     for date in dates:
         idx = df.index.get_loc(date)
-        close_price = df.iloc[idx]["Close_x"]
+        close_MCAP = df.iloc[idx][yf_ticker_a]
 
         if idx + 365 < len(df):
             returns.append({
                 "date": date,
-                "30_day_return": (df.iloc[idx+30]["Close_x"] - close_price) / close_price,
-                "45_day_return": (df.iloc[idx+45]["Close_x"] - close_price) / close_price,
-                "60_day_return": (df.iloc[idx+60]["Close_x"] - close_price) / close_price,
-                "75_day_return": (df.iloc[idx+75]["Close_x"] - close_price) / close_price,
-                "90_day_return": (df.iloc[idx+90]["Close_x"] - close_price) / close_price,
-                "120_day_return": (df.iloc[idx+120]["Close_x"] - close_price) / close_price,
-                "150_day_return": (df.iloc[idx+150]["Close_x"] - close_price) / close_price,
-                "180_day_return": (df.iloc[idx+180]["Close_x"] - close_price) / close_price,
-                "365_day_return": (df.iloc[idx+365]["Close_x"] - close_price) / close_price
+                "30_day_return": (df.iloc[idx+30][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "45_day_return": (df.iloc[idx+45][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "60_day_return": (df.iloc[idx+60][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "75_day_return": (df.iloc[idx+75][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "90_day_return": (df.iloc[idx+90][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "120_day_return": (df.iloc[idx+120][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "150_day_return": (df.iloc[idx+150][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "180_day_return": (df.iloc[idx+180][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "365_day_return": (df.iloc[idx+365][yf_ticker_a] - close_MCAP) / close_MCAP
             })
 
     returns = pd.DataFrame(returns)
@@ -516,13 +544,13 @@ def plot_ratio_above_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
 
     # Add legend, title, and labels
     ax.legend(fontsize=22)
-    ax.set_title(f"{yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} Ratio and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
+    ax.set_title(f"{yf_ticker_a}/{yf_ticker_b} Ratio and {num_ma_days}-day Moving Average", fontsize=28, fontweight='bold')
     ax.tick_params(axis='both', labelsize=22)
     ax.set_xlabel('Date', fontsize=30, fontweight='bold')
     ax.set_ylabel('Ratio', fontsize=30, fontweight='bold')
 
     # Save the plot
-    file_name = f"{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{num_ma_days}dma_plot_2.png"
+    file_name = f"{yf_ticker_a}_{yf_ticker_b}_ratio_{num_ma_days}dma_plot_2.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -552,7 +580,7 @@ def plot_ratio_above_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
     plt.xticks(rotation=45)
 
     # Save plot
-    file_name = f"{num_ma_days}dma_{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{yf_ticker_a[:-4]}_close_average_returns_2.png"
+    file_name = f"{num_ma_days}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_average_returns_2.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -577,7 +605,7 @@ def plot_ratio_above_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
                     textcoords='offset points', rotation=90)
 
     ax3.legend(loc='upper left', fontsize=20)
-    ax3.set_title(f"Number of positive and negative returns of {yf_ticker_a[:-4]} after {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio cross above {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
+    ax3.set_title(f"Number of positive and negative returns of {yf_ticker_a} after {yf_ticker_a}/{yf_ticker_b} ratio cross above {num_ma_days} days moving averages line", fontsize=20, fontweight='bold')
     ax3.tick_params(axis='both', which='major', labelsize=20, width=2, length=6)
     ax3.tick_params(axis='both', which='minor', labelsize=20, width=2, length=3)
     ax3.set_xlabel("period", fontsize=20, weight='bold')
@@ -585,7 +613,7 @@ def plot_ratio_above_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
     plt.xticks(np.arange(9), ['30 days', '45 days', '60 days', '75 days', '90 days', '120 days', '150 days', '180 days','365 days'])
     plt.xticks(rotation=45)
 
-    file_name = f"{num_ma_days}dma_{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{yf_ticker_a[:-4]}_close_number_pos_neg_returns_2.png"
+    file_name = f"{num_ma_days}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_number_pos_neg_returns_2.png"
     save_path = os.path.join(base_path, file_name)
     plt.savefig(save_path)
     plt.close()
@@ -596,9 +624,9 @@ def plot_token_two_ma_yf_api(yf_ticker, num_ma_days_a, num_ma_days_b):
     """ num_ma_days_a goes below num_ma_days_b """
 
     # Fetch data
-    token = yf.Ticker(yf_ticker).history(period="max")
-    token[f"{num_ma_days_a}_day_MA"] = token["Close"].rolling(window=num_ma_days_a).mean()
-    token[f"{num_ma_days_b}_day_MA"] = token["Close"].rolling(window=num_ma_days_b).mean()
+    token = get_cg_mcap(yf_ticker, days='max')
+    token[f"{num_ma_days_a}_day_MA"] = token[yf_ticker].rolling(window=num_ma_days_a).mean()
+    token[f"{num_ma_days_b}_day_MA"] = token[yf_ticker].rolling(window=num_ma_days_b).mean()
 
     dates = []
     for i in range(len(token) - 15):
@@ -610,20 +638,20 @@ def plot_token_two_ma_yf_api(yf_ticker, num_ma_days_a, num_ma_days_b):
     returns = []
     for date in dates:
         idx = token.index.get_loc(date)
-        close_price = token.iloc[idx]["Close"]
+        close_MCAP = token.iloc[idx][yf_ticker]
 
         if idx + 365 < len(token):
             returns.append({
                 "date": date,
-                "30_day_return": (token.iloc[idx+30]["Close"] - close_price) / close_price,
-                "45_day_return": (token.iloc[idx+45]["Close"] - close_price) / close_price,
-                "60_day_return": (token.iloc[idx+60]["Close"] - close_price) / close_price,
-                "75_day_return": (token.iloc[idx+75]["Close"] - close_price) / close_price,
-                "90_day_return": (token.iloc[idx+90]["Close"] - close_price) / close_price,
-                "120_day_return": (token.iloc[idx+120]["Close"] - close_price) / close_price,
-                "150_day_return": (token.iloc[idx+150]["Close"] - close_price) / close_price,
-                "180_day_return": (token.iloc[idx+180]["Close"] - close_price) / close_price,
-                "365_day_return": (token.iloc[idx+365]["Close"] - close_price) / close_price
+                "30_day_return": (token.iloc[idx+30][yf_ticker] - close_MCAP) / close_MCAP,
+                "45_day_return": (token.iloc[idx+45][yf_ticker] - close_MCAP) / close_MCAP,
+                "60_day_return": (token.iloc[idx+60][yf_ticker] - close_MCAP) / close_MCAP,
+                "75_day_return": (token.iloc[idx+75][yf_ticker] - close_MCAP) / close_MCAP,
+                "90_day_return": (token.iloc[idx+90][yf_ticker] - close_MCAP) / close_MCAP,
+                "120_day_return": (token.iloc[idx+120][yf_ticker] - close_MCAP) / close_MCAP,
+                "150_day_return": (token.iloc[idx+150][yf_ticker] - close_MCAP) / close_MCAP,
+                "180_day_return": (token.iloc[idx+180][yf_ticker] - close_MCAP) / close_MCAP,
+                "365_day_return": (token.iloc[idx+365][yf_ticker] - close_MCAP) / close_MCAP
             })
 
     returns = pd.DataFrame(returns)
@@ -651,10 +679,10 @@ def plot_token_two_ma_yf_api(yf_ticker, num_ma_days_a, num_ma_days_b):
 
     # Add legend, title, and labels
     ax.legend(fontsize=22)
-    ax.set_title(f"{yf_ticker[:-4]} {num_ma_days_a} and {num_ma_days_b}-day Moving Average", fontsize=28, fontweight='bold')
+    ax.set_title(f"{yf_ticker} {num_ma_days_a} and {num_ma_days_b}-day Moving Average", fontsize=28, fontweight='bold')
     ax.tick_params(axis='both', labelsize=22)
     ax.set_xlabel('Date', fontsize=30, fontweight='bold')
-    ax.set_ylabel('Price', fontsize=30, fontweight='bold')
+    ax.set_ylabel('MCAP', fontsize=30, fontweight='bold')
 
     # Save the plot
     file_name = f"{yf_ticker}_{num_ma_days_a}_{num_ma_days_b}dma_plot.png"
@@ -688,7 +716,7 @@ def plot_token_two_ma_yf_api(yf_ticker, num_ma_days_a, num_ma_days_b):
     plt.xticks(rotation=45)
 
     # Save plot to Google Drive
-    file_name = f"{yf_ticker[:-4]}_{num_ma_days_a}_{num_ma_days_b}dma_average_returns.png"
+    file_name = f"{yf_ticker}_{num_ma_days_a}_{num_ma_days_b}dma_average_returns.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -714,7 +742,7 @@ def plot_token_two_ma_yf_api(yf_ticker, num_ma_days_a, num_ma_days_b):
                     textcoords='offset points', rotation=90)
 
     ax3.legend(loc='upper left', fontsize=20)
-    ax3.set_title(f"Number of positive and negative returns after {yf_ticker[:-4]} {num_ma_days_a} cross below {num_ma_days_b} days moving averages line", fontsize=20, fontweight='bold')
+    ax3.set_title(f"Number of positive and negative returns after {yf_ticker} {num_ma_days_a} cross below {num_ma_days_b} days moving averages line", fontsize=20, fontweight='bold')
     ax3.tick_params(axis='both', which='major', labelsize=20, width=2, length=6)
     ax3.tick_params(axis='both', which='minor', labelsize=20, width=2, length=3)
     ax3.set_xlabel("period", fontsize=20, weight='bold')
@@ -723,7 +751,7 @@ def plot_token_two_ma_yf_api(yf_ticker, num_ma_days_a, num_ma_days_b):
     # Rotate x-axis labels to normal
     plt.xticks(rotation=45)
 
-    file_name = f"{yf_ticker[:-4]}_{num_ma_days_a}_{num_ma_days_b}dma_number_pos_neg_returns.png"
+    file_name = f"{yf_ticker}_{num_ma_days_a}_{num_ma_days_b}dma_number_pos_neg_returns.png"
     save_path = os.path.join(base_path, file_name)
     plt.savefig(save_path)
     return token
@@ -732,18 +760,18 @@ def plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_day
     """ num_ma_days_a goes below num_ma_days_b """
 
     # Fetch data for both tickers
-    token_a = yf.Ticker(yf_ticker_a).history(period="max")
-    token_b = yf.Ticker(yf_ticker_b).history(period="max")
+    token_a = get_cg_mcap(yf_ticker_a, days='max')
+    token_b = get_cg_mcap(yf_ticker_b, days='max')
     # Ensure both tokens have overlapping dates
-    token_b = token_b.tz_convert('UTC')
+    #token_b = token_b.tz_convert('UTC')
     # Convert index to date
-    token_a.index = token_a.index.date
-    token_b.index = token_b.index.date
+    #token_a.index = token_a.index.date
+    #token_b.index = token_b.index.date
     # Merge the dataframes on 'Date' column
     df = pd.merge(token_a, token_b, left_index=True, right_index=True, how='inner')
 
     # Now you can calculate the new column
-    df['Ratio'] = df['Close_x'] / df['Close_y']
+    df['Ratio'] = df[yf_ticker_a] / df[yf_ticker_b]
     df[f"{num_ma_days_a}_day_MA"] = df["Ratio"].rolling(window=num_ma_days_a).mean()
     df[f"{num_ma_days_b}_day_MA"] = df["Ratio"].rolling(window=num_ma_days_b).mean()
 
@@ -757,20 +785,20 @@ def plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_day
     returns = []
     for date in dates:
         idx = df.index.get_loc(date)
-        close_price = df.iloc[idx]["Close_x"]
+        close_MCAP = df.iloc[idx][yf_ticker_a]
 
         if idx + 365 < len(df):
             returns.append({
                 "date": date,
-                "30_day_return": (df.iloc[idx+30]["Close_x"] - close_price) / close_price,
-                "45_day_return": (df.iloc[idx+45]["Close_x"] - close_price) / close_price,
-                "60_day_return": (df.iloc[idx+60]["Close_x"] - close_price) / close_price,
-                "75_day_return": (df.iloc[idx+75]["Close_x"] - close_price) / close_price,
-                "90_day_return": (df.iloc[idx+90]["Close_x"] - close_price) / close_price,
-                "120_day_return": (df.iloc[idx+120]["Close_x"] - close_price) / close_price,
-                "150_day_return": (df.iloc[idx+150]["Close_x"] - close_price) / close_price,
-                "180_day_return": (df.iloc[idx+180]["Close_x"] - close_price) / close_price,
-                "365_day_return": (df.iloc[idx+365]["Close_x"] - close_price) / close_price
+                "30_day_return": (df.iloc[idx+30][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "45_day_return": (df.iloc[idx+45][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "60_day_return": (df.iloc[idx+60][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "75_day_return": (df.iloc[idx+75][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "90_day_return": (df.iloc[idx+90][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "120_day_return": (df.iloc[idx+120][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "150_day_return": (df.iloc[idx+150][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "180_day_return": (df.iloc[idx+180][yf_ticker_a] - close_MCAP) / close_MCAP,
+                "365_day_return": (df.iloc[idx+365][yf_ticker_a] - close_MCAP) / close_MCAP
             })
 
     returns = pd.DataFrame(returns)
@@ -798,13 +826,13 @@ def plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_day
 
     # Add legend, title, and labels
     ax.legend(fontsize=22)
-    ax.set_title(f"{yf_ticker_a[:-4]} {num_ma_days_a} and {num_ma_days_b}-day Moving Average", fontsize=28, fontweight='bold')
+    ax.set_title(f"{yf_ticker_a} {num_ma_days_a} and {num_ma_days_b}-day Moving Average", fontsize=28, fontweight='bold')
     ax.tick_params(axis='both', labelsize=22)
     ax.set_xlabel('Date', fontsize=30, fontweight='bold')
-    ax.set_ylabel('Price', fontsize=30, fontweight='bold')
+    ax.set_ylabel('MCAP', fontsize=30, fontweight='bold')
 
     # Save the plot
-    file_name = f"{yf_ticker_a[:-4]}_{num_ma_days_a}_{num_ma_days_b}dma_plot.png"
+    file_name = f"{yf_ticker_a}_{num_ma_days_a}_{num_ma_days_b}dma_plot.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -833,7 +861,7 @@ def plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_day
     plt.xticks(rotation=45)
 
     # Save plot
-    file_name = f"{yf_ticker_a[:-4]}_{num_ma_days_a}_{num_ma_days_b}dma_average_returns.png"
+    file_name = f"{yf_ticker_a}_{num_ma_days_a}_{num_ma_days_b}dma_average_returns.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -894,24 +922,24 @@ def send_telegram_photo(token, chat_id, caption, file_path):
     except requests.exceptions.RequestException as e:
         print(f"Error sending Telegram photo: {e}")
 
-def sending_to_tg_price_below_ma(yf_ticker, num_ma_days, base_path):
-    """Checks if the price has crossed below the moving average and sends Telegram alerts."""
+def sending_to_tg_MCAP_below_ma(yf_ticker, num_ma_days, base_path):
+    """Checks if the MCAP has crossed below the moving average and sends Telegram alerts."""
     token_df = plot_token_below_ma_yf_api(yf_ticker, num_ma_days)
-    token = os.getenv("Tg_bot_token_crossings")
+    token = os.getenv("Tg_bot_token_crossings") 
     chat_id = '-4240308218'
 
-    if token_df.iloc[-2]["Close"] > token_df.iloc[-2][f"{num_ma_days}_day_MA"] and \
-       token_df.iloc[-1]["Close"] < token_df.iloc[-1][f"{num_ma_days}_day_MA"]:
+    if token_df.iloc[-2][yf_ticker] > token_df.iloc[-2][f"{num_ma_days}_day_MA"] and \
+       token_df.iloc[-1][yf_ticker] < token_df.iloc[-1][f"{num_ma_days}_day_MA"]:
         
         # Send text alert
-        text = f'Attention, {yf_ticker[:-4]} price went below {num_ma_days}D MA!'
+        text = f'Attention, {yf_ticker} MCAP went below {num_ma_days}D MA!'
         send_telegram_message(token, chat_id, text)
 
         # Define images and captions
         image_info = [
-            (f"{yf_ticker[:-4]}_close_{num_ma_days}dma_plot.png", f'This is a timeseries chart of {yf_ticker[:-4]} price and {num_ma_days}D MA 😉'),
-            (f"{yf_ticker[:-4]}_close_{num_ma_days}dma_average_returns.png", f'These are the average returns after {yf_ticker[:-4]} goes below {num_ma_days}D MA 😉'),
-            (f"{yf_ticker[:-4]}_close_{num_ma_days}dma_number_pos_neg_returns.png", f'This is the number of positive and negative returns after {yf_ticker[:-4]} goes below {num_ma_days}D MA 😉')
+            (f"{yf_ticker}_close_{num_ma_days}dma_plot.png", f'This is a timeseries chart of {yf_ticker} MCAP and {num_ma_days}D MA 😉'),
+            (f"{yf_ticker}_close_{num_ma_days}dma_average_returns.png", f'These are the average returns after {yf_ticker} goes below {num_ma_days}D MA 😉'),
+            (f"{yf_ticker}_close_{num_ma_days}dma_number_pos_neg_returns.png", f'This is the number of positive and negative returns after {yf_ticker} goes below {num_ma_days}D MA 😉')
         ]
 
         # Send each image
@@ -919,24 +947,24 @@ def sending_to_tg_price_below_ma(yf_ticker, num_ma_days, base_path):
             file_path = os.path.join(base_path, file_name)
             send_telegram_photo(token, chat_id, caption, file_path)
 
-def sending_to_tg_price_above_ma(yf_ticker, num_ma_days, base_path):
-    """Checks if the price has crossed above the moving average and sends Telegram alerts."""
+def sending_to_tg_MCAP_above_ma(yf_ticker, num_ma_days, base_path):
+    """Checks if the MCAP has crossed above the moving average and sends Telegram alerts."""
     token_df = plot_token_above_ma_yf_api(yf_ticker, num_ma_days)
     token = os.getenv("Tg_bot_token_crossings")
     chat_id = '-4240308218'
 
-    if token_df.iloc[-2]["Close"] < token_df.iloc[-2][f"{num_ma_days}_day_MA"] and \
-       token_df.iloc[-1]["Close"] > token_df.iloc[-1][f"{num_ma_days}_day_MA"]:
+    if token_df.iloc[-2][yf_ticker] < token_df.iloc[-2][f"{num_ma_days}_day_MA"] and \
+       token_df.iloc[-1][yf_ticker] > token_df.iloc[-1][f"{num_ma_days}_day_MA"]:
         
         # Send text alert
-        text = f'Attention, {yf_ticker[:-4]} price went above {num_ma_days}D MA!'
+        text = f'Attention, {yf_ticker} MCAP went above {num_ma_days}D MA!'
         send_telegram_message(token, chat_id, text)
 
         # Define images and captions
         image_info = [
-            (f"{num_ma_days}dma_{yf_ticker[:-4]}_close_plot.png", f'This is a timeseries chart of {yf_ticker[:-4]} price and {num_ma_days}D MA 😉'),
-            (f"{num_ma_days}dma_{yf_ticker[:-4]}_close_average_returns.png", f'These are the average returns after {yf_ticker[:-4]} goes above {num_ma_days}D MA 😉'),
-            (f"{num_ma_days}dma_{yf_ticker[:-4]}_close_number_pos_neg_returns.png", f'This is the number of positive and negative returns after {yf_ticker[:-4]} goes above {num_ma_days}D MA 😉')
+            (f"{num_ma_days}dma_{yf_ticker}_close_plot.png", f'This is a timeseries chart of {yf_ticker} MCAP and {num_ma_days}D MA 😉'),
+            (f"{num_ma_days}dma_{yf_ticker}_close_average_returns.png", f'These are the average returns after {yf_ticker} goes above {num_ma_days}D MA 😉'),
+            (f"{num_ma_days}dma_{yf_ticker}_close_number_pos_neg_returns.png", f'This is the number of positive and negative returns after {yf_ticker} goes above {num_ma_days}D MA 😉')
         ]
 
         # Send each image
@@ -945,7 +973,7 @@ def sending_to_tg_price_above_ma(yf_ticker, num_ma_days, base_path):
             send_telegram_photo(token, chat_id, caption, file_path)
 
 def sending_to_tg_ratio_below_ma(yf_ticker_a, yf_ticker_b, num_ma_days, base_path):
-    """Checks if the price has crossed below the moving average and sends Telegram alerts."""
+    """Checks if the MCAP has crossed below the moving average and sends Telegram alerts."""
     token_df = plot_ratio_below_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days)
     token = os.getenv("Tg_bot_token_crossings")
     chat_id = '-4240308218'
@@ -954,14 +982,14 @@ def sending_to_tg_ratio_below_ma(yf_ticker_a, yf_ticker_b, num_ma_days, base_pat
        token_df.iloc[-1]["Ratio"] < token_df.iloc[-1][f"{num_ma_days}_day_MA"]:
         
         # Send text alert
-        text = f'Attention, {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio went below {num_ma_days}D MA!'
+        text = f'Attention, {yf_ticker_a}/{yf_ticker_b} ratio went below {num_ma_days}D MA!'
         send_telegram_message(token, chat_id, text)
 
         # Define images and captions
         image_info = [
-            (f"{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{num_ma_days}dma_plot.png", f'This is a timeseries chart of {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio and {num_ma_days}D MA 😉'),
-            (f"{num_ma_days}dma_{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{yf_ticker_a[:-4]}_close_average_returns.png", f'These are the average returns of {yf_ticker_a[:-4]} after {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio goes below {num_ma_days}D MA 😉'),
-            (f"{num_ma_days}dma_{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{yf_ticker_a[:-4]}_close_number_pos_neg_returns.png", f'This is the number of positive and negative returns of {yf_ticker_a[:-4]} after {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio goes below {num_ma_days}D MA 😉')
+            (f"{yf_ticker_a}_{yf_ticker_b}_ratio_{num_ma_days}dma_plot.png", f'This is a timeseries chart of {yf_ticker_a}/{yf_ticker_b} ratio and {num_ma_days}D MA 😉'),
+            (f"{num_ma_days}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_average_returns.png", f'These are the average returns of {yf_ticker_a} after {yf_ticker_a}/{yf_ticker_b} ratio goes below {num_ma_days}D MA 😉'),
+            (f"{num_ma_days}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_number_pos_neg_returns.png", f'This is the number of positive and negative returns of {yf_ticker_a} after {yf_ticker_a}/{yf_ticker_b} ratio goes below {num_ma_days}D MA 😉')
         ]
 
         # Send each image
@@ -970,7 +998,7 @@ def sending_to_tg_ratio_below_ma(yf_ticker_a, yf_ticker_b, num_ma_days, base_pat
             send_telegram_photo(token, chat_id, caption, file_path)
 
 def sending_to_tg_ratio_above_ma(yf_ticker_a, yf_ticker_b, num_ma_days, base_path):
-    """Checks if the price has crossed above the moving average and sends Telegram alerts."""
+    """Checks if the MCAP has crossed above the moving average and sends Telegram alerts."""
     token_df = plot_ratio_above_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days)
     token = os.getenv("Tg_bot_token_crossings")
     chat_id = '-4240308218'
@@ -979,14 +1007,14 @@ def sending_to_tg_ratio_above_ma(yf_ticker_a, yf_ticker_b, num_ma_days, base_pat
        token_df.iloc[-1]["Ratio"] > token_df.iloc[-1][f"{num_ma_days}_day_MA"]:
         
         # Send text alert
-        text = f'Attention, {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio went above {num_ma_days}D MA!'
+        text = f'Attention, {yf_ticker_a}/{yf_ticker_b} ratio went above {num_ma_days}D MA!'
         send_telegram_message(token, chat_id, text)
 
         # Define images and captions
         image_info = [
-            (f"{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{num_ma_days}dma_plot_2.png", f'This is a timeseries chart of {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio and {num_ma_days}D MA 😉'),
-            (f"{num_ma_days}dma_{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{yf_ticker_a[:-4]}_close_average_returns_2.png", f'These are the average returns of {yf_ticker_a[:-4]} after {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio goes above {num_ma_days}D MA 😉'),
-            (f"{num_ma_days}dma_{yf_ticker_a[:-4]}_{yf_ticker_b[:-4]}_ratio_{yf_ticker_a[:-4]}_close_number_pos_neg_returns_2.png", f'This is the number of positive and negative returns of {yf_ticker_a[:-4]} after {yf_ticker_a[:-4]}/{yf_ticker_b[:-4]} ratio goes above {num_ma_days}D MA 😉')
+            (f"{yf_ticker_a}_{yf_ticker_b}_ratio_{num_ma_days}dma_plot_2.png", f'This is a timeseries chart of {yf_ticker_a}/{yf_ticker_b} ratio and {num_ma_days}D MA 😉'),
+            (f"{num_ma_days}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_average_returns_2.png", f'These are the average returns of {yf_ticker_a} after {yf_ticker_a}/{yf_ticker_b} ratio goes above {num_ma_days}D MA 😉'),
+            (f"{num_ma_days}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_number_pos_neg_returns_2.png", f'This is the number of positive and negative returns of {yf_ticker_a} after {yf_ticker_a}/{yf_ticker_b} ratio goes above {num_ma_days}D MA 😉')
         ]
 
         # Send each image
@@ -1005,14 +1033,14 @@ def sending_to_tg_two_ma(yf_ticker, num_ma_days_a, num_ma_days_b, base_path):
        token_df.iloc[-1][f"{num_ma_days_a}_day_MA"] < token_df.iloc[-1][f"{num_ma_days_b}_day_MA"]:
         
         # Send text alert
-        text = f'Attention, {yf_ticker[:-4]} {num_ma_days_a} went below {num_ma_days_b}D MA!'
+        text = f'Attention, {yf_ticker} {num_ma_days_a} went below {num_ma_days_b}D MA!'
         send_telegram_message(token, chat_id, text)
 
         # Define images and captions
         image_info = [
-            (f"{yf_ticker[:-4]}_{num_ma_days_a}_{num_ma_days_b}dma_plot.png", f'This is a timeseries chart of {yf_ticker[:-4]} {num_ma_days_a} and {num_ma_days_b}D MA 😉'),
-            (f"{yf_ticker[:-4]}_{num_ma_days_a}_{num_ma_days_b}dma_average_returns.png", f'These are the average returns after {yf_ticker[:-4]} {num_ma_days_a} goes below {num_ma_days_b}D MA 😉'),
-            (f"{yf_ticker[:-4]}_{num_ma_days_a}_{num_ma_days_b}dma_number_pos_neg_returns.png", f'This is the number of positive and negative returns after {yf_ticker[:-4]} {num_ma_days_a} goes below {num_ma_days_b}D MA 😉')
+            (f"{yf_ticker}_{num_ma_days_a}_{num_ma_days_b}dma_plot.png", f'This is a timeseries chart of {yf_ticker} {num_ma_days_a} and {num_ma_days_b}D MA 😉'),
+            (f"{yf_ticker}_{num_ma_days_a}_{num_ma_days_b}dma_average_returns.png", f'These are the average returns after {yf_ticker} {num_ma_days_a} goes below {num_ma_days_b}D MA 😉'),
+            (f"{yf_ticker}_{num_ma_days_a}_{num_ma_days_b}dma_number_pos_neg_returns.png", f'This is the number of positive and negative returns after {yf_ticker} {num_ma_days_a} goes below {num_ma_days_b}D MA 😉')
         ]
 
         # Send each image
@@ -1028,81 +1056,81 @@ def run_all_checks():
     ma_periods = [50, 100, 200, 365]
     
     try:
-        # ETH-USD above MA checks
-        print("\nChecking ETH-USD above MA...")
+        # ethereum above MA checks
+        print("\nChecking ethereum above MA...")
         for period in ma_periods:
-            print(f"Checking ETH-USD above {period}D MA...")
-            sending_to_tg_price_above_ma("ETH-USD", period, base_path)
+            print(f"Checking ethereum above {period}D MA...")
+            sending_to_tg_MCAP_above_ma("ethereum", period, base_path)
         
-        # BTC-USD above MA checks
-        print("\nChecking BTC-USD above MA...")
+        # bitcoin above MA checks
+        print("\nChecking bitcoin above MA...")
         for period in ma_periods:
-            print(f"Checking BTC-USD above {period}D MA...")
-            sending_to_tg_price_above_ma("BTC-USD", period, base_path)
+            print(f"Checking bitcoin above {period}D MA...")
+            sending_to_tg_MCAP_above_ma("bitcoin", period, base_path)
         
-        # ETH-USD below MA checks
-        print("\nChecking ETH-USD below MA...")
+        # ethereum below MA checks
+        print("\nChecking ethereum below MA...")
         for period in ma_periods:
-            print(f"Checking ETH-USD below {period}D MA...")
-            sending_to_tg_price_below_ma("ETH-USD", period, base_path)
+            print(f"Checking ethereum below {period}D MA...")
+            sending_to_tg_MCAP_below_ma("ethereum", period, base_path)
         
-        # BTC-USD below MA checks
-        print("\nChecking BTC-USD below MA...")
+        # bitcoin below MA checks
+        print("\nChecking bitcoin below MA...")
         for period in ma_periods:
-            print(f"Checking BTC-USD below {period}D MA...")
-            sending_to_tg_price_below_ma("BTC-USD", period, base_path)
+            print(f"Checking bitcoin below {period}D MA...")
+            sending_to_tg_MCAP_below_ma("bitcoin", period, base_path)
         
-        # BTC-USD and ^GSPC ratio checks
-        print("\nChecking BTC-USD and ^GSPC ratios...")
-        sending_to_tg_ratio_below_ma("BTC-USD", "^GSPC", 100, base_path)
-        sending_to_tg_ratio_above_ma("BTC-USD", "^GSPC", 100, base_path)
+        # bitcoin and ^GSPC ratio checks
+        #print("\nChecking bitcoin and ^GSPC ratios...")
+        #sending_to_tg_ratio_below_ma("bitcoin", "^GSPC", 100, base_path)
+        #sending_to_tg_ratio_above_ma("bitcoin", "^GSPC", 100, base_path)
         
-        # BTC-USD and ^GSPC MA ratio checks
-        print("\nChecking BTC-USD and ^GSPC MA ratios...")
-        sending_to_tg_two_ma("BTC-USD", 50, 200, base_path)
-        sending_to_tg_two_ma("BTC-USD", 200, 50, base_path)
+        # bitcoin and ^GSPC MA ratio checks
+        print("\nChecking bitcoin MA ratios...")
+        sending_to_tg_two_ma("bitcoin", 50, 200, base_path)
+        sending_to_tg_two_ma("bitcoin", 200, 50, base_path)
         
-        # BTC-USD and ETH-USD ratio checks
-        print("\nChecking BTC-USD and ETH-USD ratios...")
-        sending_to_tg_two_ma("BTC-USD", 50, 200, base_path)
-        sending_to_tg_two_ma("BTC-USD", 200, 50, base_path)
+        # bitcoin and ethereum ratio checks
+        print("\nChecking bitcoin ratios...")
+        sending_to_tg_two_ma("bitcoin", 50, 200, base_path)
+        sending_to_tg_two_ma("bitcoin", 200, 50, base_path)
         
-        # ETH-USD MA ratio checks
-        print("\nChecking ETH-USD MA ratios...")
-        sending_to_tg_two_ma("ETH-USD", 50, 200, base_path)
-        sending_to_tg_two_ma("ETH-USD", 200, 50, base_path)
+        # ethereum MA ratio checks
+        print("\nChecking ethereum MA ratios...")
+        sending_to_tg_two_ma("ethereum", 50, 200, base_path)
+        sending_to_tg_two_ma("ethereum", 200, 50, base_path)
         
-        # BTC-USD MA ratio checks
-        print("\nChecking BTC-USD MA ratios...")
-        sending_to_tg_two_ma("BTC-USD", 50, 200, base_path)
-        sending_to_tg_two_ma("BTC-USD", 200, 50, base_path)
+        # bitcoin MA ratio checks
+        print("\nChecking bitcoin MA ratios...")
+        sending_to_tg_two_ma("bitcoin", 50, 200, base_path)
+        sending_to_tg_two_ma("bitcoin", 200, 50, base_path)
         
         # Short-term MA ratio checks
         print("\nChecking short-term MA ratios...")
-        # ETH-USD 7/30 MA
-        sending_to_tg_two_ma("ETH-USD", 7, 30, base_path)
-        sending_to_tg_two_ma("ETH-USD", 30, 7, base_path)
-        # BTC-USD 7/30 MA
-        sending_to_tg_two_ma("BTC-USD", 7, 30, base_path)
-        sending_to_tg_two_ma("BTC-USD", 30, 7, base_path)
+        # ethereum 7/30 MA
+        sending_to_tg_two_ma("ethereum", 7, 30, base_path)
+        sending_to_tg_two_ma("ethereum", 30, 7, base_path)
+        # bitcoin 7/30 MA
+        sending_to_tg_two_ma("bitcoin", 7, 30, base_path)
+        sending_to_tg_two_ma("bitcoin", 30, 7, base_path)
         
-        # BTC-USD and ETH-USD ratio MA checks
-        print("\nChecking BTC-USD and ETH-USD ratio MAs...")
+        # bitcoin and ethereum ratio MA checks
+        print("\nChecking bitcoin and ethereum ratio MAs...")
         # 50/200 MA
-        sending_to_tg_two_ma("BTC-USD", 50, 200, base_path)
-        sending_to_tg_two_ma("BTC-USD", 200, 50, base_path)
+        sending_to_tg_two_ma("bitcoin", 50, 200, base_path)
+        sending_to_tg_two_ma("bitcoin", 200, 50, base_path)
         # 7/30 MA
-        sending_to_tg_two_ma("BTC-USD", 7, 30, base_path)
-        sending_to_tg_two_ma("BTC-USD", 30, 7, base_path)
+        sending_to_tg_two_ma("bitcoin", 7, 30, base_path)
+        sending_to_tg_two_ma("bitcoin", 30, 7, base_path)
         
-        # ETH-USD ratio MA checks
-        print("\nChecking ETH-USD ratio MAs...")
+        # ethereum ratio MA checks
+        print("\nChecking ethereum ratio MAs...")
         # 50/200 MA
-        sending_to_tg_two_ma("ETH-USD", 50, 200, base_path)
-        sending_to_tg_two_ma("ETH-USD", 200, 50, base_path)
+        sending_to_tg_two_ma("ethereum", 50, 200, base_path)
+        sending_to_tg_two_ma("ethereum", 200, 50, base_path)
         # 7/30 MA
-        sending_to_tg_two_ma("ETH-USD", 7, 30, base_path)
-        sending_to_tg_two_ma("ETH-USD", 30, 7, base_path)
+        sending_to_tg_two_ma("ethereum", 7, 30, base_path)
+        sending_to_tg_two_ma("ethereum", 30, 7, base_path)
         
         print("\n✅ All checks completed successfully!")
         return True
