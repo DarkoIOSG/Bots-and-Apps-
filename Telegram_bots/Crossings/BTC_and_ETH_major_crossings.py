@@ -129,6 +129,7 @@ def plot_token_below_ma_yf_api(yf_ticker, num_ma_days):
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
+    plt.close()
 
     # Plotting
     fig, ax = plt.subplots(figsize=(22, 11))
@@ -160,6 +161,7 @@ def plot_token_below_ma_yf_api(yf_ticker, num_ma_days):
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
+    plt.close()
 
     ret  =returns.drop(['date'], axis=1)
 
@@ -194,6 +196,7 @@ def plot_token_below_ma_yf_api(yf_ticker, num_ma_days):
     file_name = f"{yf_ticker}_close_{num_ma_days}dma_number_pos_neg_returns.png"
     save_path = os.path.join(base_path, file_name)
     plt.savefig(save_path)
+    plt.close()
     return token
 
 def plot_token_above_ma_yf_api(yf_ticker, num_ma_days):
@@ -263,7 +266,7 @@ def plot_token_above_ma_yf_api(yf_ticker, num_ma_days):
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
-
+    plt.close()
     # Plotting
     fig, ax = plt.subplots(figsize=(22, 11))
     bars = average_returns.plot(kind='bar', ax=ax, edgecolor='black', linewidth=3, label='Average Returns')
@@ -294,7 +297,7 @@ def plot_token_above_ma_yf_api(yf_ticker, num_ma_days):
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
-
+    plt.close()
     ret  =returns.drop(['date'], axis=1)
 
     df = ret
@@ -328,6 +331,7 @@ def plot_token_above_ma_yf_api(yf_ticker, num_ma_days):
     file_name = f"{num_ma_days}dma_{yf_ticker}_close_number_pos_neg_returns.png"
     save_path = os.path.join(base_path, file_name)
     plt.savefig(save_path)
+    plt.close()
     return token
 
 def plot_ratio_below_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
@@ -409,7 +413,6 @@ def plot_ratio_below_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
     plt.close()
-
     # Plotting average returns
     fig, ax = plt.subplots(figsize=(22, 11))
     bars = average_returns.plot(kind='bar', ax=ax, edgecolor='black', linewidth=3, label='Average Returns')
@@ -689,7 +692,7 @@ def plot_token_two_ma_yf_api(yf_ticker, num_ma_days_a, num_ma_days_b):
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
-
+    plt.close()
     # Plotting
     fig, ax = plt.subplots(figsize=(22, 11))
     bars = average_returns.plot(kind='bar', ax=ax, edgecolor='black', linewidth=3, label='Average Returns')
@@ -720,7 +723,7 @@ def plot_token_two_ma_yf_api(yf_ticker, num_ma_days_a, num_ma_days_b):
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
-
+    plt.close()
     ret  =returns.drop(['date'], axis=1)
 
     df = ret
@@ -754,6 +757,7 @@ def plot_token_two_ma_yf_api(yf_ticker, num_ma_days_a, num_ma_days_b):
     file_name = f"{yf_ticker}_{num_ma_days_a}_{num_ma_days_b}dma_number_pos_neg_returns.png"
     save_path = os.path.join(base_path, file_name)
     plt.savefig(save_path)
+    plt.close()
     return token
 
 def plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_days_b):
@@ -836,7 +840,7 @@ def plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_day
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
-
+    plt.close()
     # Plotting
     fig, ax = plt.subplots(figsize=(22, 11))
     bars = average_returns.plot(kind='bar', ax=ax, edgecolor='black', linewidth=3, label='Average Returns')
@@ -865,7 +869,7 @@ def plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_day
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
-
+    plt.close()
     ret  =returns.drop(['date'], axis=1)
 
     df = ret
@@ -899,6 +903,7 @@ def plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_day
     file_name = f"{yf_ticker_a}_{num_ma_days_a}_{num_ma_days_b}dma_number_pos_neg_returns.png"
     save_path = os.path.join(base_path, file_name)
     plt.savefig(save_path)
+    plt.close()
     return df
 
 def send_telegram_message(token, chat_id, text):
