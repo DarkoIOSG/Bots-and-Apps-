@@ -96,6 +96,10 @@ def plot_token_below_ma_yf_api(yf_ticker, num_ma_days):
 
     returns = pd.DataFrame(returns)
 
+    if returns.empty:
+        print(f"⚠️ No valid MA crossing signals found for {yf_ticker} with {num_ma_days}-day MA.")
+        return token
+    
     average_returns = {
         "30_day_return": returns["30_day_return"].mean(),
         "45_day_return": returns["45_day_return"].mean(),
@@ -231,6 +235,10 @@ def plot_token_above_ma_yf_api(yf_ticker, num_ma_days):
 
     returns = pd.DataFrame(returns)
 
+    if returns.empty:
+        print(f"⚠️ No valid MA crossing signals found for {yf_ticker} with {num_ma_days}-day MA.")
+        return token
+    
     average_returns = {
         "30_day_return": returns["30_day_return"].mean(),
         "45_day_return": returns["45_day_return"].mean(),
@@ -377,6 +385,10 @@ def plot_ratio_below_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
 
     returns = pd.DataFrame(returns)
 
+    if returns.empty:
+        print(f"⚠️ No valid MA crossing signals found for {yf_ticker_a}/{yf_ticker_b} Ratio with {num_ma_days}-day MA.")
+        return df
+    
     average_returns = {
         "30_day_return": returns["30_day_return"].mean(),
         "45_day_return": returns["45_day_return"].mean(),
@@ -523,6 +535,10 @@ def plot_ratio_above_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days):
 
     returns = pd.DataFrame(returns)
 
+    if returns.empty:
+        print(f"⚠️ No valid MA crossing signals found for {yf_ticker_a}/{yf_ticker_b} ratio with {num_ma_days}-day MA.")
+        return df
+    
     average_returns = {
         "30_day_return": returns["30_day_return"].mean(),
         "45_day_return": returns["45_day_return"].mean(),
@@ -658,6 +674,10 @@ def plot_token_two_ma_yf_api(yf_ticker, num_ma_days_a, num_ma_days_b):
 
     returns = pd.DataFrame(returns)
 
+    if returns.empty:
+        print(f"⚠️ No valid MA crossing signals found for {yf_ticker} with {num_ma_days_a}-day MA and {num_ma_days_b}-day MA.")
+        return token
+    
     average_returns = {
         "30_day_return": returns["30_day_return"].mean(),
         "45_day_return": returns["45_day_return"].mean(),
@@ -808,6 +828,10 @@ def plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_day
 
     returns = pd.DataFrame(returns)
 
+    if returns.empty:
+        print(f"⚠️ No valid MA crossing signals found for {yf_ticker_a}/{yf_ticker_b} ratio with {num_ma_days_a}-day MA and {num_ma_days_b}-day MA.")
+        return df
+    
     average_returns = {
         "30_day_return": returns["30_day_return"].mean(),
         "45_day_return": returns["45_day_return"].mean(),
@@ -837,7 +861,7 @@ def plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_day
     ax.set_ylabel('MCAP', fontsize=30, fontweight='bold')
 
     # Save the plot
-    file_name = f"{yf_ticker_a}_{num_ma_days_a}_{num_ma_days_b}dma_plot.png"
+    file_name = f"{yf_ticker_a}_{yf_ticker_b}_ratio_{num_ma_days_a}dma_plot.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
@@ -867,13 +891,13 @@ def plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_day
     plt.xticks(rotation=45)
 
     # Save plot
-    file_name = f"{yf_ticker_a}_{num_ma_days_a}_{num_ma_days_b}dma_average_returns.png"
+    file_name = f"{num_ma_days_a}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_average_returns.png"
     save_path = os.path.join(base_path, file_name)
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     plt.savefig(save_path)
 
     ret  =returns.drop(['date'], axis=1)
-
+    df1 = df
     df = ret
     positive_counts, negative_counts = calculate_counts(df)
 
@@ -902,11 +926,11 @@ def plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_day
     # Rotate x-axis labels to normal
     plt.xticks(rotation=45)
 
-    file_name = f"{yf_ticker_a}_{num_ma_days_a}_{num_ma_days_b}dma_number_pos_neg_returns.png"
+    file_name = f"{num_ma_days_a}dma_{yf_ticker_a}_{yf_ticker_b}_ratio_{yf_ticker_a}_close_number_pos_neg_returns.png"
     save_path = os.path.join(base_path, file_name)
     plt.savefig(save_path)
     plt.close()
-    return df
+    return df1
 
 
 def send_telegram_message(token, chat_id, text):
@@ -1061,7 +1085,6 @@ def sending_to_tg_ratio_two_ma(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_d
     token_df = plot_ratio_two_ma_yf_api(yf_ticker_a, yf_ticker_b, num_ma_days_a, num_ma_days_b)
     token = os.getenv("Tg_bot_token_crossings_2")
     chat_id = '-4282992498'
-
     if token_df.iloc[-2][f"{num_ma_days_a}_day_MA"] > token_df.iloc[-2][f"{num_ma_days_b}_day_MA"] and \
        token_df.iloc[-1][f"{num_ma_days_a}_day_MA"] < token_df.iloc[-1][f"{num_ma_days_b}_day_MA"]:
         
@@ -1087,22 +1110,21 @@ def run_all_checks():
     
     # List of MA periods to check
     ma_periods = [50, 100]
-    
     try:
         # ethereum above MA checks
-        print("\nChecking ETH above MA...")
+        print("\n 1 Checking ETH above MA...")
         for period in ma_periods:
             print(f"Checking ETH above {period}D MA...")
             sending_to_tg_MCAP_above_ma("ethereum", period, base_path)
         
         # bitcoin above MA checks
-        print("\nChecking BTC above MA...")
+        print("\n  2 Checking BTC above MA...")
         for period in ma_periods:
             print(f"Checking BTC above {period}D MA...")
             sending_to_tg_MCAP_above_ma("bitcoin", period, base_path)
 
         # near above MA checks
-        print("\nChecking NEAR above MA...")
+        print("\n 3 Checking NEAR above MA...")
         for period in ma_periods:
             print(f"Checking NEAR above {period}D MA...")
             sending_to_tg_MCAP_above_ma("near", period, base_path)
@@ -1114,61 +1136,61 @@ def run_all_checks():
             #sending_to_tg_MCAP_above_ma("GAL-USD", period, base_path)
 
         # maker above MA checks
-        print("\nChecking MKR above MA...")
+        print("\n 4 Checking MKR above MA...")
         for period in ma_periods:
             print(f"Checking MKR above {period}D MA...")
             sending_to_tg_MCAP_above_ma("maker", period, base_path)
 
         # 1inch above MA checks
-        print("\nChecking 1INCH above MA...")
+        print("\n 5 Checking 1INCH above MA...")
         for period in ma_periods:
             print(f"Checking 1INCH above {period}D MA...")
             sending_to_tg_MCAP_above_ma("1inch", period, base_path)
 
         # arbitrum above MA checks
-        print("\nChecking ARB above MA...")
+        print("\n 6 Checking ARB above MA...")
         for period in ma_periods:
             print(f"Checking ARB above {period}D MA...")
             sending_to_tg_MCAP_above_ma("arbitrum", period, base_path)
 
         # filecoin above MA checks
-        print("\nChecking FIL above MA...")
+        print("\n 7 Checking FIL above MA...")
         for period in ma_periods:
             print(f"Checking FIL above {period}D MA...")
             sending_to_tg_MCAP_above_ma("filecoin", period, base_path)
 
         # polygon-ecosystem-token above MA checks
-        print("\nChecking MATIC above MA...")
+        print("\n 8 Checking MATIC above MA...")
         for period in ma_periods:
             print(f"Checking MATIC above {period}D MA...")
             sending_to_tg_MCAP_above_ma("polygon-ecosystem-token", period, base_path)
 
         # celestia above MA checks
-        #print("\nChecking TIA above MA...")
-        #for period in ma_periods:
-            #print(f"Checking TIA above {period}D MA...")
-            #sending_to_tg_MCAP_above_ma("celestia", period, base_path)
+        print("\n 9 Checking TIA above MA...")
+        for period in ma_periods:
+            print(f"Checking TIA above {period}D MA...")
+            sending_to_tg_MCAP_above_ma("celestia", period, base_path)
 
         # uniswap above MA checks
-        print("\nChecking uniswap above MA...")
+        print("\n 10 Checking uniswap above MA...")
         for period in ma_periods:
             print(f"Checking uniswap above {period}D MA...")
             sending_to_tg_MCAP_above_ma("uniswap", period, base_path)
         
         # ethereum below MA checks
-        print("\nChecking ETH below MA...")
+        print("\n 11 Checking ETH below MA...")
         for period in ma_periods:
             print(f"Checking ETH below {period}D MA...")
             sending_to_tg_MCAP_below_ma("ethereum", period, base_path)
         
         # bitcoin below MA checks
-        print("\nChecking BTC below MA...")
+        print("\n 12 Checking BTC below MA...")
         for period in ma_periods:
             print(f"Checking BTC below {period}D MA...")
             sending_to_tg_MCAP_below_ma("bitcoin", period, base_path)
 
         # near below MA checks
-        print("\nChecking NEAR below MA...")
+        print("\n 13 Checking NEAR below MA...")
         for period in ma_periods:
             print(f"Checking NEAR below {period}D MA...")
             sending_to_tg_MCAP_below_ma("near", period, base_path)
@@ -1180,48 +1202,46 @@ def run_all_checks():
             #sending_to_tg_MCAP_below_ma("GAL-USD", period, base_path)
 
         # maker below MA checks
-        print("\nChecking MKR below MA...")
+        print("\n 14 Checking MKR below MA...")
         for period in ma_periods:
             print(f"Checking MKR below {period}D MA...")
             sending_to_tg_MCAP_below_ma("maker", period, base_path)
 
         # 1inch below MA checks
-        print("\nChecking 1INCH below MA...")
+        print("\n 15 Checking 1INCH below MA...")
         for period in ma_periods:
             print(f"Checking 1INCH below {period}D MA...")
             sending_to_tg_MCAP_below_ma("1inch", period, base_path)
 
         # arbitrum below MA checks
-        print("\nChecking ARB below MA...")
+        print("\n 16 Checking ARB below MA...")
         for period in ma_periods:
             print(f"Checking ARB below {period}D MA...")
             sending_to_tg_MCAP_below_ma("arbitrum", period, base_path)
 
         # filecoin below MA checks
-        print("\nChecking FIL below MA...")
+        print("\n 17 Checking FIL below MA...")
         for period in ma_periods:
             print(f"Checking FIL below {period}D MA...")
             sending_to_tg_MCAP_below_ma("filecoin", period, base_path)
 
         # polygon-ecosystem-token below MA checks
-        #print("\nChecking MATIC below MA...")
-        #for period in ma_periods:
-            #print(f"Checking MATIC below {period}D MA...")
-            #sending_to_tg_MCAP_below_ma("polygon-ecosystem-token", period, base_path)
+        print("\n 18 Checking MATIC below MA...")
+        for period in ma_periods:
+            print(f"Checking MATIC below {period}D MA...")
+            sending_to_tg_MCAP_below_ma("polygon-ecosystem-token", period, base_path)
 
         # celestia below MA checks
-        #print("\nChecking TIA below MA...")
-        #for period in ma_periods:
-            #print(f"Checking TIA below {period}D MA...")
-            #sending_to_tg_MCAP_below_ma("celestia", period, base_path)
-
-
+        print("\n 19 Checking TIA below MA...")
+        for period in ma_periods:
+            print(f"Checking TIA below {period}D MA...")
+            sending_to_tg_MCAP_below_ma("celestia", period, base_path)
 
         # uniswap below MA checks
-        #print("\nChecking uniswap below MA...")
-        #for period in ma_periods:
-            #print(f"Checking uniswap below {period}D MA...")
-            #sending_to_tg_MCAP_below_ma("uniswap", period, base_path)
+        print("\n 20 Checking uniswap below MA...")
+        for period in ma_periods:
+            print(f"Checking uniswap below {period}D MA...")
+            sending_to_tg_MCAP_below_ma("uniswap", period, base_path)
         
 
 
@@ -1231,200 +1251,198 @@ def run_all_checks():
         #sending_to_tg_ratio_above_ma("bitcoin", "^GSPC", 100, base_path)
 
         # near and ethereum ratio checks
-        print("\nChecking NEAR and ETH ratios...")
+        print("\n 21 Checking NEAR and ETH ratios...")
         sending_to_tg_ratio_below_ma("near", "ethereum", 100, base_path)
         sending_to_tg_ratio_above_ma("near", "ethereum", 100, base_path)
 
         # near and ethereum ratio checks
-        print("\nChecking NEAR and ETH ratios...")
+        print("\n 22 Checking NEAR and ETH ratios...")
         sending_to_tg_ratio_below_ma("near", "ethereum", 50, base_path)
         sending_to_tg_ratio_above_ma("near", "ethereum", 50, base_path)
 
         # 1inch and ethereum ratio checks
-        print("\nChecking 1INCH and ETH ratios...")
+        print("\n 23 Checking 1INCH and ETH ratios...")
         sending_to_tg_ratio_below_ma("1inch", "ethereum", 100, base_path)
         sending_to_tg_ratio_above_ma("1inch", "ethereum", 100, base_path)
 
         # 1inch and ethereum ratio checks
-        print("\nChecking 1INCH and ETH ratios...")
+        print("\n 24 Checking 1INCH and ETH ratios...")
         sending_to_tg_ratio_below_ma("1inch", "ethereum", 50, base_path)
         sending_to_tg_ratio_above_ma("1inch", "ethereum", 50, base_path)
 
         # maker and ethereum ratio checks
-        print("\nChecking MKR and ETH ratios...")
+        print("\n 25 Checking MKR and ETH ratios...")
         sending_to_tg_ratio_below_ma("maker", "ethereum", 100, base_path)
         sending_to_tg_ratio_above_ma("maker", "ethereum", 100, base_path)
 
         # maker and ethereum ratio checks
-        print("\nChecking MKR and ETH ratios...")
+        print("\n 26 Checking MKR and ETH ratios...")
         sending_to_tg_ratio_below_ma("maker", "ethereum", 50, base_path)
         sending_to_tg_ratio_above_ma("maker", "ethereum", 50, base_path)
 
-
+        # arbitrum and ethereum ratio checks
+        print("\n 27 Checking ARB and ETHD ratios...")
+        sending_to_tg_ratio_below_ma("arbitrum", "ethereum", 100, base_path)
+        sending_to_tg_ratio_above_ma("arbitrum", "ethereum", 100, base_path)
 
         # arbitrum and ethereum ratio checks
-        #print("\nChecking ARB and ETHD ratios...")
-        #sending_to_tg_ratio_below_ma("arbitrum", "ethereum", 100, base_path)
-        #sending_to_tg_ratio_above_ma("arbitrum", "ethereum", 100, base_path)
-
-
-
-        # arbitrum and ethereum ratio checks
-        print("\nChecking ARB and ETH ratios...")
+        print("\n 28 Checking ARB and ETH ratios...")
         sending_to_tg_ratio_below_ma("arbitrum", "ethereum", 50, base_path)
         sending_to_tg_ratio_above_ma("arbitrum", "ethereum", 50, base_path)
 
         # polygon-ecosystem-token and ethereum ratio checks
-        #print("\nChecking MATIC and ETH ratios...")
-        #sending_to_tg_ratio_below_ma("polygon-ecosystem-token", "ethereum", 100, base_path)
-        #sending_to_tg_ratio_above_ma("polygon-ecosystem-token", "ethereum", 100, base_path)
+        print("\n 29 Checking MATIC and ETH ratios...")
+        sending_to_tg_ratio_below_ma("polygon-ecosystem-token", "ethereum", 100, base_path)
+        sending_to_tg_ratio_above_ma("polygon-ecosystem-token", "ethereum", 100, base_path)
 
         # polygon-ecosystem-token and ethereum ratio checks
-        #print("\nChecking MATIC and ETH ratios...")
-        #sending_to_tg_ratio_below_ma("polygon-ecosystem-token", "ethereum", 50, base_path)
-        #sending_to_tg_ratio_above_ma("polygon-ecosystem-token", "ethereum", 50, base_path)
+        print("\n 30 Checking MATIC and ETH ratios...")
+        sending_to_tg_ratio_below_ma("polygon-ecosystem-token", "ethereum", 50, base_path)
+        sending_to_tg_ratio_above_ma("polygon-ecosystem-token", "ethereum", 50, base_path)
 
         # uniswap and ethereum ratio checks
-        print("\nChecking uniswap and ethereum ratios...")
+        print("\n 31 Checking uniswap and ethereum ratios...")
         sending_to_tg_ratio_below_ma("uniswap", "ethereum", 100, base_path)
         sending_to_tg_ratio_above_ma("uniswap", "ethereum", 100, base_path)
 
         # uniswap and ethereum ratio checks
-        print("\nChecking uniswap and ethereum ratios...")
+        print("\n 32 Checking uniswap and ethereum ratios...")
         sending_to_tg_ratio_below_ma("uniswap", "ethereum", 50, base_path)
         sending_to_tg_ratio_above_ma("uniswap", "ethereum", 50, base_path)
 
         # celestia and ethereum ratio checks
-        #print("\nChecking TIA and ETH ratios...")
-        #sending_to_tg_ratio_below_ma("celestia", "ethereum", 100, base_path)
-        #sending_to_tg_ratio_above_ma("celestia", "ethereum", 100, base_path)
+        print("\n 33 Checking TIA and ETH ratios...")
+        sending_to_tg_ratio_below_ma("celestia", "ethereum", 100, base_path)
+        sending_to_tg_ratio_above_ma("celestia", "ethereum", 100, base_path)
 
         # celestia and ethereum ratio checks
-        #print("\nChecking TIA and ETH ratios...")
-        #sending_to_tg_ratio_below_ma("celestia", "ethereum", 50, base_path)
-        #sending_to_tg_ratio_above_ma("celestia", "ethereum", 50, base_path)
+        print("\n 34 Checking TIA and ETH ratios...")
+        sending_to_tg_ratio_below_ma("celestia", "ethereum", 50, base_path)
+        sending_to_tg_ratio_above_ma("celestia", "ethereum", 50, base_path)
 
         # filecoin and bitcoin ratio checks
-        print("\nChecking FIL and BTC ratios...")
+        print("\n 35 Checking FIL and BTC ratios...")
         sending_to_tg_ratio_below_ma("filecoin", "bitcoin", 100, base_path)
         sending_to_tg_ratio_above_ma("filecoin", "bitcoin", 100, base_path)
 
         # filecoin and bitcoin ratio checks
-        #print("\nChecking FIL and BTC ratios...")
-        #sending_to_tg_ratio_below_ma("filecoin", "bitcoin", 50, base_path)
-        #sending_to_tg_ratio_above_ma("filecoin", "bitcoin", 50, base_path)
+        print("\n 36 Checking FIL and BTC ratios...")
+        sending_to_tg_ratio_below_ma("filecoin", "bitcoin", 50, base_path)
+        sending_to_tg_ratio_above_ma("filecoin", "bitcoin", 50, base_path)
         
         # bitcoin MA ratio checks
-        print("\nChecking BTC MA ratios...")
+        print("\n 37 Checking BTC MA ratios...")
         sending_to_tg_two_ma("bitcoin", 50, 200, base_path)
         sending_to_tg_two_ma("bitcoin", 200, 50, base_path)
         
         # filecoin MA ratio checks
-        print("\nChecking FIL MA ratios...")
+        print("\n 38 Checking FIL MA ratios...")
         sending_to_tg_two_ma("filecoin", 50, 200, base_path)
         sending_to_tg_two_ma("filecoin", 200, 50, base_path)
 
         # ethereum MA ratio checks
-        print("\nChecking ETH MA ratios...")
+        print("\n 39 Checking ETH MA ratios...")
         sending_to_tg_two_ma("ethereum", 50, 200, base_path)
         sending_to_tg_two_ma("ethereum", 200, 50, base_path)
-
+        
         # celestia MA ratio checks
-        #print("\nChecking TIA MA ratios...")
-        #sending_to_tg_two_ma("celestia", 50, 200, base_path)
-        #sending_to_tg_two_ma("celestia", 200, 50, base_path)
+        print("\n 40 Checking TIA MA ratios...")
+        sending_to_tg_two_ma("celestia", 50, 200, base_path)
+        sending_to_tg_two_ma("celestia", 200, 50, base_path)
 
         # polygon-ecosystem-token MA ratio checks
-        #print("\nChecking MATIC MA ratios...")
-        #sending_to_tg_two_ma("polygon-ecosystem-token", 50, 200, base_path)
-        #sending_to_tg_two_ma("polygon-ecosystem-token", 200, 50, base_path)
+        print("\n 41 Checking MATIC MA ratios...")
+        sending_to_tg_two_ma("polygon-ecosystem-token", 50, 200, base_path)
+        sending_to_tg_two_ma("polygon-ecosystem-token", 200, 50, base_path)
 
         # uniswap MA ratio checks
-        print("\nChecking UNI3 MA ratios...")
+        print("\n 42 Checking UNI3 MA ratios...")
         sending_to_tg_two_ma("uniswap", 50, 200, base_path)
         sending_to_tg_two_ma("uniswap", 200, 50, base_path)
 
         # arbitrum MA ratio checks
-        #print("\nChecking ARB MA ratios...")
-        #sending_to_tg_two_ma("arbitrum", 50, 200, base_path)
-        #sending_to_tg_two_ma("arbitrum", 200, 50, base_path)
+        print("\n 43 Checking ARB MA ratios...")
+        sending_to_tg_two_ma("arbitrum", 50, 200, base_path)
+        sending_to_tg_two_ma("arbitrum", 200, 50, base_path)
 
         # maker MA ratio checks
-        print("\nChecking MKR MA ratios...")
+        print("\n 44 Checking MKR MA ratios...")
         sending_to_tg_two_ma("maker", 50, 200, base_path)
         sending_to_tg_two_ma("maker", 200, 50, base_path)
 
         # 1inch MA ratio checks
-        print("\nChecking 1INCH MA ratios...")
+        print("\n 45 Checking 1INCH MA ratios...")
         sending_to_tg_two_ma("1inch", 50, 200, base_path)
         sending_to_tg_two_ma("1inch", 200, 50, base_path)
         
         # near MA ratio checks
-        print("\nChecking NEAR MA ratios...")
+        print("\n 46 Checking NEAR MA ratios...")
         sending_to_tg_two_ma("near", 50, 200, base_path)
         sending_to_tg_two_ma("near", 200, 50, base_path)
         
         # Short-term MA ratio checks
-        print("\nChecking short-term MA ratios...")
+        print("\n Checking short-term MA ratios...")
         # bitcoin MA ratio checks
-        print("\nChecking BTC MA ratios...")
+        print("\n 48 Checking BTC MA ratios...")
         sending_to_tg_two_ma("bitcoin", 7, 30, base_path)
         sending_to_tg_two_ma("bitcoin", 30, 7, base_path)
         
         # filecoin MA ratio checks
-        print("\nChecking FIL MA ratios...")
+        print("\n 49 Checking FIL MA ratios...")
         sending_to_tg_two_ma("filecoin", 7, 30, base_path)
         sending_to_tg_two_ma("filecoin", 30, 7, base_path)
 
         # ethereum MA ratio checks
-        print("\nChecking ETH MA ratios...")
+        print("\n 50 Checking ETH MA ratios...")
         sending_to_tg_two_ma("ethereum", 7, 30, base_path)
         sending_to_tg_two_ma("ethereum", 30, 7, base_path)
 
         # celestia MA ratio checks
-        #print("\nChecking TIA MA ratios...")
-        #sending_to_tg_two_ma("celestia", 7, 30, base_path)
-        #sending_to_tg_two_ma("celestia", 30, 7, base_path)
+        print("\n 51 Checking TIA MA ratios...")
+        sending_to_tg_two_ma("celestia", 7, 30, base_path)
+        sending_to_tg_two_ma("celestia", 30, 7, base_path)
 
         # polygon-ecosystem-token MA ratio checks
-        #print("\nChecking MATIC MA ratios...")
-        #sending_to_tg_two_ma("polygon-ecosystem-token", 7, 30, base_path)
-        #sending_to_tg_two_ma("polygon-ecosystem-token", 30, 7, base_path)
+        print("\n 52 Checking MATIC MA ratios...")
+        sending_to_tg_two_ma("polygon-ecosystem-token", 7, 30, base_path)
+        sending_to_tg_two_ma("polygon-ecosystem-token", 30, 7, base_path)
 
         # uniswap MA ratio checks
-        print("\nChecking uniswap MA ratios...")
+        print("\n 53 Checking uniswap MA ratios...")
         sending_to_tg_two_ma("uniswap", 7, 30, base_path)
         sending_to_tg_two_ma("uniswap", 30, 7, base_path)
 
         # arbitrum MA ratio checks
-        print("\nChecking ARB MA ratios...")
+        print("\n 54 Checking ARB MA ratios...")
         sending_to_tg_two_ma("arbitrum", 7, 30, base_path)
         sending_to_tg_two_ma("arbitrum", 30, 7, base_path)
 
         # maker MA ratio checks
-        print("\nChecking MKR MA ratios...")
+        print("\n 55 Checking MKR MA ratios...")
         sending_to_tg_two_ma("maker", 7, 30, base_path)
         sending_to_tg_two_ma("maker", 30, 7, base_path)
 
         # 1inch MA ratio checks
-        print("\nChecking 1INCH MA ratios...")
+        print("\n 56Checking 1INCH MA ratios...")
         sending_to_tg_two_ma("1inch", 7, 30, base_path)
         sending_to_tg_two_ma("1inch", 30, 7, base_path)
         
         # near MA ratio checks
-        print("\nChecking NEAR MA ratios...")
+        print("\n 57 Checking NEAR MA ratios...")
         sending_to_tg_two_ma("near", 7, 30, base_path)
         sending_to_tg_two_ma("near", 30, 7, base_path)
         
         # bitcoin and ethereum ratio MA checks
-        print("\nChecking BTC and ETH ratio MAs...")
+        print("\n 58 Checking BTC and ETH ratio MAs...")
         # 50/200 MA
         sending_to_tg_ratio_two_ma('bitcoin', 'ethereum', 50, 200, base_path)
+        print("\n 59 Checking BTC and ETH ratio MAs...")
         sending_to_tg_ratio_two_ma('bitcoin', 'ethereum', 200, 50, base_path)
         #sending_to_tg_ratio_two_ma('bitcoin', '^GSPC', 50, 200, base_path)
         #sending_to_tg_ratio_two_ma('bitcoin', '^GSPC', 200, 50, base_path)
-
+        print("\n 60 Checking BTC and ETH ratio MAs...")
         sending_to_tg_ratio_two_ma('ethereum', 'bitcoin', 50, 200, base_path)
+        print("\n 61 Checking BTC and ETH ratio MAs...")
         sending_to_tg_ratio_two_ma('ethereum', 'bitcoin', 200, 50, base_path)
         
         # 7/30 MA
